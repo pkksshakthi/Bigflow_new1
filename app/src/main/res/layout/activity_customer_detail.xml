@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context="view.activity.CustomerDetailActivity">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_margin="10dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <TextView
+                style="@style/PrimaryTextHilight"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="SALES" />
+
+
+            <TableLayout
+                android:id="@+id/tbl_layout_Sales"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="10dp">
+
+
+            </TableLayout>
+
+            <TextView
+                style="@style/PrimaryTextHilight"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="COLLECTION" />
+
+            <TableLayout
+                android:id="@+id/tbl_layout_Collection"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="10dp">
+
+            </TableLayout>
+
+            <TextView
+                style="@style/PrimaryTextHilight"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="OUTSTANDING" />
+
+            <TableLayout
+                android:id="@+id/tbl_layout_Outstanding"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="10dp">
+
+            </TableLayout>
+
+        </LinearLayout>
+
+    </ScrollView>
+</LinearLayout>

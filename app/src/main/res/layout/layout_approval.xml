@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="?attr/selectableItemBackground"
+    android:orientation="vertical">
+
+    <android.support.v7.widget.CardView
+        android:id="@+id/post_card_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="3dp"
+        app:cardElevation="2dp">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+
+            <TextView
+                android:id="@+id/txtCustomerName"
+                style="@style/PrimaryText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingTop="3dp"
+                android:paddingBottom="3dp"
+                android:text="Customer Name" />
+
+            <TextView
+                android:id="@+id/txtEmployeeName"
+                style="@style/SecondaryTextHilight"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/txtCustomerName"
+                android:drawableLeft="@drawable/ic_action_person_20dp"
+                android:gravity="center|left"
+                android:paddingLeft="0dp"
+                android:paddingTop="3dp"
+                android:paddingBottom="3dp"
+                android:text="Location Name" />
+
+            <TextView
+                android:id="@+id/txtVerticalLine"
+                style="@style/VerticalLine"
+                android:layout_below="@id/txtEmployeeName"
+                android:layout_marginLeft="5dp"
+                android:layout_marginTop="5dp"
+                android:layout_marginRight="5dp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/txtEmployeeName"
+                android:layout_marginTop="5dp"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/txtCustViewSales"
+                    style="@style/SecondaryText"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:drawableLeft="@drawable/ic_action_list"
+                    android:gravity="center|left"
+                    android:text="View Sales"
+                    android:tooltipText="Comment" />
+            </LinearLayout>
+
+
+        </RelativeLayout>
+
+    </android.support.v7.widget.CardView>
+
+</LinearLayout>

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--<color name="colorPrimary">#3F51B5</color>-->
+    <!--<color name="colorPrimaryDark">#303F9F</color>-->
+    <!--<color name="colorAccent">#FF4081</color>-->
+
+    <color name="colorPrimary">#0484a1</color>
+    <color name="colorPrimaryDark">#005772</color>
+    <color name="colorAccent">#53b4d2</color>
+
+    <color name="nav_divider_color">#ededed</color>
+    <color name="login_btn_color">#53b4d2</color>
+    <color name="shadow_color">#a7a8a8</color>
+    <color name="backgroud">#dedede</color>
+    <color name="ripple">#dce3e9</color>
+    <color name="ControlNormal">#abaaaa</color>
+
+    <color name="TextPrimary">#001116</color>
+    <color name="TextSecondary">#777777</color>
+    <color name="TextSecondaryHilight">#4c899c</color>
+
+    <!--status-->
+    <color name="warning">#ffab00</color>
+    <color name="success">#00c853</color>
+    <color name="error">#ff0000</color>
+
+    <color name="open">#00c853</color>
+    <color name="closed">#ff0000</color>
+    <!--colors-->
+    <color name="colorWhite">#f9f9f9</color>
+    <color name="colorRed">#ff0000</color>
+
+    <color name="lightgreen">#aaff7c</color>
+    <color name="lightred">#f29287</color>
+
+</resources>

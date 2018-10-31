@@ -1,0 +1,35 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context="view.fragment.AboutFragment">
+
+    <ImageView
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:layout_gravity="center"
+        android:layout_marginTop="100dp"
+        android:src="@drawable/vsolv_logo_transparent" />
+
+    <TextView
+        android:id="@+id/txtcompanyname"
+        style="@style/PrimaryTextHilight"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:lines="1"
+        android:text="@string/company_name_underline" />
+
+    <TextView
+        android:id="@+id/txtaddress"
+        style="@style/SecondaryTextHilight"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:minLines="3"
+        android:text="@string/company_address" />
+
+
+</LinearLayout>
