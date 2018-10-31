@@ -57,6 +57,7 @@
         <service
             android:name="network.LocationService"
             android:enabled="true"
+            android:process=".services"
             android:exported="true" />
 
         <activity

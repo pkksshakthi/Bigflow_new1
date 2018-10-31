@@ -114,16 +114,18 @@ public class LocationService extends Service implements LocationListener {
             Toast.makeText(this, "Enable the GPS access", Toast.LENGTH_LONG).show();
             return;
 
-        } else if (isNetworkEnable) {
+        } /*else if (isNetworkEnable) {
+            Log.v("location", "isNetworkEnable");
             location = null;
-            locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000, 0, this);
+            locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, this);
             if (locationManager != null) {
                 location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
             }
-
-        } else if (isGPSEnable) {
+*/
+          else if (isGPSEnable) {
+            Log.v("location", "isGPSEnable");
             location = null;
-            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 0, this);
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
             if (locationManager != null) {
                 location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
             }
