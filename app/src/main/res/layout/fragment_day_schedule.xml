@@ -14,7 +14,8 @@
 
         <android.support.v7.widget.CardView
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:layout_margin="3dp">
 
             <SearchView
                 android:id="@+id/customer_search"
@@ -36,7 +37,7 @@
             android:id="@+id/RV_DaySchedule"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_margin="5dp" />
+             />
     </LinearLayout>
 
 
