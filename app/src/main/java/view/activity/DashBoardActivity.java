@@ -104,6 +104,8 @@ public class DashBoardActivity extends AppCompatActivity {
             manager.setInexactRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), interval, pendingIntent);
 
         } catch (Exception e) {
+
+            
         }
         connectivityReceiver.setConnectivityReceiver(new ConnectivityReceiver.ConnectivityReceiverListener() {
             @Override
