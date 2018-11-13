@@ -1,15 +1,15 @@
 package models;
 
 public class UserDetails {
-    private static String user_id;
+    private static int user_id;
     private static String user_name;
     private static String user_type;
     private static String user_code;
     private static String today_date;
-    private static String entity_gid;
+    private static int entity_gid;
 
 
-    public static void setUser_id(String user_id) {
+    public static void setUser_id(int user_id) {
         UserDetails.user_id = user_id;
     }
 
@@ -29,12 +29,12 @@ public class UserDetails {
         UserDetails.today_date = today_date;
     }
 
-    public static void setEntity_gid(String entity_gid) {
+    public static void setEntity_gid(int entity_gid) {
         UserDetails.entity_gid = entity_gid;
     }
 
 
-    public static String getUser_id() {
+    public static int getUser_id() {
         return user_id;
     }
 
@@ -54,7 +54,7 @@ public class UserDetails {
         return today_date;
     }
 
-    public static String getEntity_gid() {
+    public static int getEntity_gid() {
         return entity_gid;
     }
 

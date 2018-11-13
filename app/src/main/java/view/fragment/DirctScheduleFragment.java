@@ -21,6 +21,7 @@ import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.SearchView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -51,6 +52,7 @@ import network.CallbackHandler;
 import presenter.NetworkResult;
 import presenter.VolleyCallback;
 import view.activity.CollectionActivity;
+import view.activity.CommentActivity;
 import view.activity.CustomerDetailActivity;
 import view.activity.DashBoardActivity;
 import view.activity.HistoryActivity;
@@ -65,7 +67,7 @@ public class DirctScheduleFragment extends Fragment implements View.OnClickListe
 
     private static final String ARG_Title = "title";
     private static final String ARG_PARAM2 = "param2";
-    EditText customerSearch;
+    SearchView customerSearch;
     private RecyclerView recyclerView;
     private TextView empty_view, reload;
     public CustomerAdapter adapter;
@@ -110,7 +112,7 @@ public class DirctScheduleFragment extends Fragment implements View.OnClickListe
     @Override
     public View onCreateView(LayoutInflater inflater, final ViewGroup container,
                              Bundle savedInstanceState) {
-        getActivity().setTitle("Direct Entry");
+        getActivity().setTitle(Constant.title_direct_schedule);
         View view = inflater.inflate(R.layout.fragment_dirct_schedule, container, false);
         fragmentView = view;
         loadView(view);
@@ -135,26 +137,23 @@ public class DirctScheduleFragment extends Fragment implements View.OnClickListe
         //linearLayoutManager.setReverseLayout(true);
         recyclerView.setLayoutManager(linearLayoutManager);
         customerList = new ArrayList<>();
+        customerSearch.setQueryHint("Search");
         reload.setOnClickListener(this);
         progressDialog = new ProgressDialog(getContext());
         progressDialog.setTitle(getResources().getString(R.string.loading));
         progressDialog.setCancelable(false);
 
         getData = new GetData(getActivity());
-        customerSearch.addTextChangedListener(new TextWatcher() {
+        customerSearch.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
+            public boolean onQueryTextSubmit(String query) {
+                return false;
             }
 
             @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-                filter(s.toString());
+            public boolean onQueryTextChange(String newText) {
+                filter(newText);
+                return false;
             }
         });
     }
@@ -254,7 +253,10 @@ public class DirctScheduleFragment extends Fragment implements View.OnClickListe
 
             @Override
             public void onCommentClick(Variables.Customer item, int position) {
-
+                Intent intent = new Intent(getActivity(), CommentActivity.class);
+                intent.putExtra("customer_gid", item.customer_gid);
+                intent.putExtra("customer_name", item.customer_name);
+                startActivity(intent);
             }
         });
 

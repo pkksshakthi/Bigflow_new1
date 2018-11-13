@@ -1,10 +1,7 @@
 package constant;
 
-import org.json.JSONObject;
-
 import java.util.List;
 
-import models.UserMenu;
 import models.Variables;
 
 public class Constant {
@@ -107,4 +104,29 @@ public class Constant {
     public static final String st_service = "SERVICE";
     public static final String st_stock = "STOCK";
     public static final String st_other = "OTHERS";
+
+    // Device Info
+    public static final String Battery_Status = "Battery_Status";
+    public static final String LocationMode = "LocationMode";
+    public static final String AirplaneMode = "AirplaneMode";
+    public static final String MobileModel = "MobileModel";
+    public static final String MobileBrand = "MobileBrand";
+    public static final String MobileID = "MobileID";
+    public static final String Process = "Process";
+    // SQL Table
+    public static final String Deviceinfo_Date = "deviceinfo_date";
+    public static final String Deviceinfo_Data = "deviceinfo_data";
+    public static final String Deviceinfo_issync = "deviceinfo_issync";
+
+    //page title(ToolBar Title)
+    public static final String title_direct_schedule = "Direct Outcome";
+    public static final String title_day_schedule = "Day's Schedule";
+    public static final String title_home = "Bigflow";
+    public static final String title_Approve = "Approve";
+    public static final String title_employee_tracking = "Tracking";
+    public static final String title_add_schedule = "Add Schedule";
+    public static final String title_route_summary = "Route";
+    public static final String title_service_summary = "Service";
+    public static final String title_fet_review = "FET Review";
+
 }

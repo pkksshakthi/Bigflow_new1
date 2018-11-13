@@ -207,7 +207,7 @@ public class ServiceActivity extends AppCompatActivity {
                             try {
                                 params_Json.put("action", "Insert");
                                 params_Json.put("entity_gid", 1);
-                                params_Json.put("employee_gid", Integer.parseInt(UserDetails.getUser_id()));
+                                params_Json.put("employee_gid", UserDetails.getUser_id());
                                 params_Json.put("customer_gid", customer_gid);
                                 params_Json.put("date", Remark_date);
                                 params_Json.put("status", "INITIATED");

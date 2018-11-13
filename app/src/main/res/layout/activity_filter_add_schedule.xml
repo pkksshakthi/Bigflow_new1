@@ -51,16 +51,18 @@
         <Button
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_margin="2dp"
+            android:layout_margin="5dp"
             android:layout_weight="1"
-            android:text="Clear" />
+            android:text="Clear"
+            android:background="@color/shadow_color"/>
 
         <Button
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_margin="2dp"
+            android:layout_margin="5dp"
             android:layout_weight="1"
+            android:layout_gravity="center"
             android:text="Apply"
-            android:background="@drawable/submit_button"/>
+            android:background="@color/colorAccent"/>
     </LinearLayout>
 </LinearLayout>

@@ -84,11 +84,12 @@
         <activity
             android:name="view.activity.CustomerDetailActivity"
             android:screenOrientation="portrait" />
-        <activity android:name="view.activity.CommentActivity"></activity>
+        <activity android:name="view.activity.CommentActivity" />
         <activity
             android:name="view.activity.ApprovalActivity"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
+        <activity android:name="view.activity.FilterStatusReview"></activity>
     </application>
 
 </manifest>

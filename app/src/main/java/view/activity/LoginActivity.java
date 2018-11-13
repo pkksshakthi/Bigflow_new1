@@ -160,9 +160,9 @@ public class LoginActivity extends Activity {
 
         UserDetails.setUser_code(jsonObject.getString("employee_code"));
         UserDetails.setToday_date(jsonObject.getString("date"));
-        UserDetails.setUser_id(jsonObject.getString("employee_gid"));
+        UserDetails.setUser_id(jsonObject.getInt("employee_gid"));
         UserDetails.setUser_name(jsonObject.getString("employee_name"));
-        UserDetails.setEntity_gid(jsonObject.getString("entity_gid"));
+        UserDetails.setEntity_gid(jsonObject.getInt("entity_gid"));
         if (isOnline(getApplicationContext())) {
             loadMenu(jsonObject);
         } else {

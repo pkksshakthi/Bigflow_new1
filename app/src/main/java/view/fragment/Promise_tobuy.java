@@ -134,7 +134,10 @@ public class Promise_tobuy extends Fragment implements View.OnClickListener {
 
                             if (message.equals("SUCCESS")) {
                                 Toast.makeText(getActivity(), "Remark saved", Toast.LENGTH_LONG).show();
-                                startActivity(new Intent(getActivity(), DashBoardActivity.class));
+
+
+
+
                             } else {
                                 Toast.makeText(getContext(), "Remark Not Saved", Toast.LENGTH_LONG).show();
 

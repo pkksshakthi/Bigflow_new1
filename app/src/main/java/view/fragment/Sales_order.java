@@ -9,6 +9,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.text.Editable;
+import android.text.InputFilter;
 import android.text.InputType;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -36,6 +37,7 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import constant.Constant;
 import models.AutoProductAdapter;
@@ -46,8 +48,6 @@ import network.CallbackHandler;
 import presenter.VolleyCallback;
 
 public class Sales_order extends Fragment implements View.OnClickListener {
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
     public Bundle customer_details;
@@ -57,9 +57,9 @@ public class Sales_order extends Fragment implements View.OnClickListener {
     int cust_gid, soheaderno = 0, Sale_Schedule_gid = 0;
     String EditStatus;
     ArrayList<Variables.Update_sales> updateSales = new ArrayList<Variables.Update_sales>();
-    // TODO: Rename and change types of parameters
+    int j_sale = 1;
+    List<Integer> DeleteList = new ArrayList<Integer>();
     private String mParam1;
-    // Table Layout
     private String mParam2;
     private ProspectFragment.OnFragmentInteractionListener mListener;
     private TableRow tableRow;
@@ -69,84 +69,41 @@ public class Sales_order extends Fragment implements View.OnClickListener {
     private AutoProductAdapter autoProductAdapter;
     private ArrayList<Integer> favProduct;
     private ProgressDialog progressDialog;
-
     private View.OnClickListener delete_clickListener = new View.OnClickListener() {
         public void onClick(View v) {
-            final TableRow row = (TableRow) v.getParent();
-            final int rowIndex = tableLayout.indexOfChild(row);
-            Variables.Update_sales updateSalesobj = updateSales.get(rowIndex - 1);
-            final JSONArray salearray = new JSONArray();
-            JSONObject Json = new JSONObject();
-            JSONObject saleJson = new JSONObject();
-            JSONObject saleJson1 = new JSONObject();
-            JSONObject params_Json = new JSONObject();
-            try {
-                Json.put("sodetails_product_gid", updateSalesobj.product_id);
-                Json.put("quantity", updateSalesobj.qty);
-                Json.put("sodetails_gid", updateSalesobj.sodetails_gid);
-                Json.put("soheader_gid", soheaderno);
-                salearray.put(Json);
-                saleJson.put("sodetails", salearray);
-                saleJson.put("schedule_gid", Sale_Schedule_gid);
-                saleJson1.put("emp_gid", UserDetails.getUser_id());
-                saleJson1.put("custid", cust_gid);
-                saleJson1.put("data", saleJson);
-                saleJson1.put("ACTION", "Delete");
-                params_Json.put("parms", saleJson1);
 
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-
-            String URL = Constant.URL + "FET_SalesOrder?Emp_gid=" + UserDetails.getUser_id() +
-                    "&Entity_gid=1&Date=" + Common.convertDateString(new Date(), "dd-MMM-yyyy");
-
-            CallbackHandler.sendReqest(getActivity(), Request.Method.POST, params_Json.toString(), URL, new VolleyCallback() {
-                @Override
-                public void onSuccess(String result) {
-                    try {
-                        JSONObject jsonObject = new JSONObject(result);
-                        String status = jsonObject.getString("MESSAGE");
-                        if (status.equals("SUCCESS")) {
-                            updateSales.remove(rowIndex - 1);
-                            tableLayout.removeView(row);
-
-                            int total = tableLayout.getChildCount();
-                            for (int j = 1; j <= total; j++) {
-                                View view = tableLayout.getChildAt(j);
-                                if (view instanceof TableRow) {
-                                    TableRow row1 = (TableRow) view;
-                                    TextView t = (TextView) row1.getChildAt(0);
-                                    t.setText("" + (j));
-                                }
-                            }
-                            Toast.makeText(getActivity(), "Product Deleted Succussfully.", Toast.LENGTH_LONG).show();
-
-
-                        } else {
-                            Toast.makeText(getActivity(), "Error While Deleting.", Toast.LENGTH_LONG).show();
-                        }
-                    } catch (JSONException e) {
-                        Log.e("Sales", e.getMessage());
+            if (updateSales.size() != 1) {
+                final TableRow row = (TableRow) v.getParent();
+                final int rowIndex = tableLayout.indexOfChild(row);
+                Variables.Update_sales updateSalesobj = updateSales.get(rowIndex - 1);
+                DeleteList.add(updateSalesobj.sodetails_gid);
+                updateSales.remove(rowIndex - 1);
+                favProduct.remove(rowIndex - 1);
+                tableLayout.removeView(row);
+                int total = tableLayout.getChildCount();
+                for (int j = 1; j <= total; j++) {
+                    View view = tableLayout.getChildAt(j);
+                    if (view instanceof TableRow) {
+                        TableRow row1 = (TableRow) view;
+                        TextView t = (TextView) row1.getChildAt(0);
+                        t.setText("" + (j));
                     }
                 }
+                j_sale--;
 
-                @Override
-                public void onFailure(String result) {
-                    Log.e("Location", result);
+            } else {
+                Toast.makeText(getActivity(), "You Cannot Delete This line.", Toast.LENGTH_LONG).show();
 
-                }
-            });
-
-
+            }
         }
     };
     private AdapterView.OnItemClickListener autoItemClickListener = new AdapterView.OnItemClickListener() {
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             Variables.Product product = autoProductAdapter.getSelectedItem(position);
-            Generate_Layout(product.product_name, Common.convertDateString(new Date(), "dd-MMM-yyyy"), "0", product.product_id, i);
+            Generate_Layout(product.product_name, Common.convertDateString(new Date(), "dd-MMM-yyyy"), "0", product.product_id, j_sale, 0);
             auto_product.setText("");
+            j_sale++;
         }
     };
 
@@ -196,11 +153,11 @@ public class Sales_order extends Fragment implements View.OnClickListener {
         btnUpdate = rootView.findViewById(R.id.btnUpdate);
         btnCancel = rootView.findViewById(R.id.btnCancel);
         btnsubmit_order.setOnClickListener(this);
-        btnsubmit_order.setEnabled(false);
+
         btnUpdate.setOnClickListener(this);
-        btnUpdate.setEnabled(false);
+
         btnCancel.setOnClickListener(this);
-        btnCancel.setEnabled(false);
+
         if (soheaderno != 0) {
             relativeLayoutupdate.setVisibility(View.VISIBLE);
             btnsubmit_order.setVisibility(View.GONE);
@@ -287,7 +244,7 @@ public class Sales_order extends Fragment implements View.OnClickListener {
                                 String Date = Common.convertDateString(Common.convertDate(lsDate, "yyyy-MM-dd"),
                                         "dd-MMM-yyyy");
 
-                                Generate_Layout(ProductName, Date, Qty, ProductGid, i);// Values will be passed from here
+                                Generate_Layout(ProductName, Date, Qty, ProductGid, i, 0);// Values will be passed from here
                             }
                             btnsubmit_order.setEnabled(true);
                         }
@@ -341,12 +298,13 @@ public class Sales_order extends Fragment implements View.OnClickListener {
                                 int sodetails_gid = obj_json.getInt("sodetails_gid");
                                 String soheader_status = obj_json.getString("soheader_status");
                                 if (soheader_status != "CANCELLED") {
-                                    Variables.Update_sales updateSale_set = new Variables.Update_sales(ProductGid, sodetails_gid, Integer.parseInt(Qty));
-                                    updateSales.add(updateSale_set);
-                                    Generate_Layout(ProductName, Date, Qty, ProductGid, i);// Values will be passed from here
+
+                                    Generate_Layout(ProductName, Date, Qty, ProductGid, j_sale, sodetails_gid);
+                                    j_sale++;
                                 }
                             }
-                            btnsubmit_order.setEnabled(true);
+                            btnUpdate.setEnabled(true);
+                            btnCancel.setEnabled(true);
                         }
                     } catch (JSONException e) {
                         Log.e("SALE", e.getMessage());
@@ -371,7 +329,7 @@ public class Sales_order extends Fragment implements View.OnClickListener {
         }
     }
 
-    private void Generate_Layout(String Name, String Date, String Qty, int ProductGid, int i) {
+    private void Generate_Layout(String Name, String Date, String Qty, int ProductGid, int i, int sodetails_gid) {
         try {
             favProduct.add(Integer.valueOf(ProductGid));
             tableLayout.setStretchAllColumns(true);
@@ -387,17 +345,17 @@ public class Sales_order extends Fragment implements View.OnClickListener {
 
             sNo.setBackground(getResources().getDrawable(R.drawable.table_body));
             sNo.setLayoutParams(lp);
-            sNo.setText("1");
+//            sNo.setText("1");
             sNo.setGravity(Gravity.CENTER);
-            int total = tableLayout.getChildCount();
-            for (int j = 1; j <= total; j++) {
-                View view = tableLayout.getChildAt(j);
-                if (view instanceof TableRow) {
-                    TableRow row = (TableRow) view;
-                    TextView t = (TextView) row.getChildAt(0);
-                    t.setText("" + (j + 1));
-                }
-            }
+//            int total = tableLayout.getChildCount();
+//            for (int j = 1; j <= total; j++) {
+//                View view = tableLayout.getChildAt(j);
+//                if (view instanceof TableRow) {
+//                    TableRow row = (TableRow) view;
+//                    TextView t = (TextView) row.getChildAt(0);
+//                    t.setText("" + (j + 1));
+//                }
+//            }
 
 
             TextView productName = new TextView(getActivity());
@@ -427,6 +385,9 @@ public class Sales_order extends Fragment implements View.OnClickListener {
             orderQty.setGravity(Gravity.CENTER);
             orderQty.setFocusable(true);
             orderQty.setInputType(InputType.TYPE_CLASS_NUMBER);
+            if (soheaderno != 0) {
+                orderQty.setText(Qty);
+            }
 
             val.add(orderQty);
 
@@ -453,9 +414,23 @@ public class Sales_order extends Fragment implements View.OnClickListener {
                 minusBtn.setOnClickListener(delete_clickListener);
                 tableRow.addView(minusBtn);
             }
-            tableLayout.addView(tableRow, 1);
+            if (soheaderno == 0) {
+                tableLayout.addView(tableRow, 1);
+            } else {
+                tableLayout.addView(tableRow, i);
+                Variables.Update_sales updateSale_set = new Variables.Update_sales(ProductGid, sodetails_gid, Integer.parseInt(Qty));
+                updateSales.add(updateSale_set);
+            }
+            int total = tableLayout.getChildCount();
+            for (int j = 1; j <= total; j++) {
+                View view = tableLayout.getChildAt(j);
+                if (view instanceof TableRow) {
+                    TableRow row1 = (TableRow) view;
+                    TextView t = (TextView) row1.getChildAt(0);
+                    t.setText("" + (j));
+                }
+            }
 
-            i = i - 1;
         } catch (Exception e) {
             String Log = e.getMessage();
         }
@@ -515,6 +490,9 @@ public class Sales_order extends Fragment implements View.OnClickListener {
         orderQty.setTextColor(0xFFFFFFFF);
         orderQty.setTextSize(15);
         orderQty.setGravity(Gravity.CENTER);
+        orderQty.setFilters(new InputFilter[]{new InputFilter.LengthFilter(3) {
+        }});
+        orderQty.setFilters(new InputFilter[]{new Common.InputFilterMinMax("1", "500")});
         orderQty.setLayoutParams(lp);
         orderQty.setBackgroundResource(R.drawable.table_header);
 
@@ -573,7 +551,7 @@ public class Sales_order extends Fragment implements View.OnClickListener {
                                 try {
                                     JSONObject Full_Json = new JSONObject();
                                     JSONObject params_Json = new JSONObject();
-                                    params_Json.put(Constant.emp_gid, Integer.parseInt(UserDetails.getUser_id()));
+                                    params_Json.put(Constant.emp_gid, UserDetails.getUser_id());
                                     params_Json.put(Constant.soheader_gid, 0);
                                     params_Json.put(Constant.customer_gid, cust_gid);
                                     JSONObject detail_Json = new JSONObject();
@@ -614,130 +592,191 @@ public class Sales_order extends Fragment implements View.OnClickListener {
                 Log.e("Sales", e.getMessage());
             }
         } else if (view == btnUpdate) {
+            if (val.size() > 0) {
+                JSONArray salearray = new JSONArray();
 
-            final JSONArray salearray = new JSONArray();
-            JSONObject Json = new JSONObject();
-            JSONObject saleJson = new JSONObject();
-            JSONObject saleJson1 = new JSONObject();
-            JSONObject params_Json = new JSONObject();
-            int total = tableLayout.getChildCount();
-            try {
-                for (int j = 1; j < total; j++) {
-                    View viewtbl = tableLayout.getChildAt(j);
-                    if (viewtbl instanceof TableRow) {
-                        EditText qty = (EditText) ((TableRow) view).getChildAt(4);
-                        if (qty.length() != 0) {
-                            Variables.Update_sales updateSalesobj = updateSales.get(j - 1);
-                            Json.put("sodetails_product_gid", updateSalesobj.product_id);
-                            Json.put("quantity", Integer.parseInt(qty.getText().toString()));
-                            Json.put("sodetails_gid", updateSalesobj.sodetails_gid);
-                            Json.put("soheader_gid", soheaderno);
-                            salearray.put(Json);
+                JSONObject saleJson = new JSONObject();
+                JSONObject saleJson1 = new JSONObject();
+                final JSONObject params_Json = new JSONObject();
+                int total = tableLayout.getChildCount();
+                try {
+                    for (int j = 1; j < total; j++) {
+                        View viewtbl = tableLayout.getChildAt(j);
+                        if (viewtbl instanceof TableRow) {
+                            EditText qty = (EditText) ((TableRow) viewtbl).getChildAt(4);
+                            if (qty.length() != 0 && Integer.parseInt(qty.getText().toString()) >= 1) {
+                                JSONObject Json = new JSONObject();
+                                Variables.Update_sales updateSalesobj = updateSales.get(j - 1);
+                                Json.put("sodetails_product_gid", updateSalesobj.product_id);
+                                Json.put("quantity", Integer.parseInt(qty.getText().toString()));
+                                if (updateSalesobj.sodetails_gid != 0) {
+                                    Json.put("sodetails_gid", updateSalesobj.sodetails_gid);
+                                    Json.put("soheader_gid", soheaderno);
+                                }
+                                salearray.put(Json);
+                            } else {
+                                Toast.makeText(getActivity(), "Fill All Quantity Field.", Toast.LENGTH_LONG).show();
+                                return;
+                            }
                         }
                     }
-                }
-                saleJson.put("sodetails", salearray);
-                saleJson.put("schedule_gid", Sale_Schedule_gid);
-                saleJson1.put("emp_gid", UserDetails.getUser_id());
-                saleJson1.put("custid", cust_gid);
-                saleJson1.put("data", saleJson);
-                saleJson1.put("ACTION", "Update");
-                params_Json.put("parms", saleJson1);
 
-            } catch (JSONException e) {
-                e.printStackTrace();
+                    saleJson.put("sodetails", salearray);
+                    //saleJson.put("schedule_gid", Sale_Schedule_gid);
+                    if (EditStatus == "REJECTED") {
+                        saleJson.put("soheader", new JSONObject().put("status", "RESUBMIT"));
+                    }
+                    saleJson1.put("emp_gid", UserDetails.getUser_id());
+                    saleJson1.put("custid", cust_gid);
+                    saleJson1.put("data", saleJson);
+                    saleJson1.put("ACTION", "Update");
+                    params_Json.put("parms", saleJson1);
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                if (salearray.length() != 0) {
+
+                    final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                    builder.setTitle("Confirm");
+                    builder.setMessage("Are You Sure To Submit?");
+                    builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            String OutMessage = Delete_submit();
+                            if (OutMessage == "Delete Success") {
+                                String URL = Constant.URL + "FET_SalesOrder?Emp_gid=" + UserDetails.getUser_id() +
+                                        "&Entity_gid=1&Date=" + Common.convertDateString(new Date(), "dd-MMM-yyyy");
+
+                                CallbackHandler.sendReqest(getActivity(), Request.Method.POST, params_Json.toString(), URL, new VolleyCallback() {
+                                    @Override
+                                    public void onSuccess(String result) {
+                                        try {
+                                            JSONObject jsonObject = new JSONObject(result);
+                                            String status = jsonObject.getString("MESSAGE");
+                                            if (status.equals("SUCCESS")) {
+
+                                                Toast.makeText(getActivity(), "Sale Updated Succussfully.", Toast.LENGTH_LONG).show();
+                                                getActivity().finish();
+
+                                            } else {
+                                                Toast.makeText(getActivity(), "Error While Edited.", Toast.LENGTH_LONG).show();
+                                            }
+                                        } catch (JSONException e) {
+                                            Log.e("Sales", e.getMessage());
+                                        }
+                                    }
+
+                                    @Override
+                                    public void onFailure(String result) {
+                                        Log.e("Location", result);
+
+                                    }
+                                });
+                            } else {
+                                Toast.makeText(getActivity(), "Problem With Delete.", Toast.LENGTH_LONG).show();
+
+                            }
+                        }
+                    });
+                    builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                        }
+                    });
+                    builder.show();
+
+                } else {
+                    Toast.makeText(getActivity(), "No Data To Save.", Toast.LENGTH_LONG).show();
+
+                }
+            } else {
+                Toast.makeText(getActivity(), "No Data To Save.", Toast.LENGTH_LONG).show();
+
             }
-
-            String URL = Constant.URL + "FET_SalesOrder?Emp_gid=" + UserDetails.getUser_id() +
-                    "&Entity_gid=1&Date=" + Common.convertDateString(new Date(), "dd-MMM-yyyy");
-
-            CallbackHandler.sendReqest(getActivity(), Request.Method.POST, params_Json.toString(), URL, new VolleyCallback() {
-                @Override
-                public void onSuccess(String result) {
-                    try {
-                        JSONObject jsonObject = new JSONObject(result);
-                        String status = jsonObject.getString("MESSAGE");
-                        if (status.equals("SUCCESS")) {
-
-                            Toast.makeText(getActivity(), "Sale Updated Succussfully.", Toast.LENGTH_LONG).show();
-
-
-                        } else {
-                            Toast.makeText(getActivity(), "Error While Edited.", Toast.LENGTH_LONG).show();
-                        }
-                    } catch (JSONException e) {
-                        Log.e("Sales", e.getMessage());
-                    }
-                }
-
-                @Override
-                public void onFailure(String result) {
-                    Log.e("Location", result);
-
-                }
-            });
-
         } else if (view == btnCancel) {
 
             final JSONArray salearray = new JSONArray();
-            JSONObject Json = new JSONObject();
+
             JSONObject saleJson = new JSONObject();
             JSONObject saleJson1 = new JSONObject();
-            JSONObject params_Json = new JSONObject();
+            final JSONObject params_Json = new JSONObject();
             int total = tableLayout.getChildCount();
             try {
                 for (int j = 1; j < total; j++) {
                     View viewtbl = tableLayout.getChildAt(j);
-                    if (viewtbl instanceof TableRow) {
-                        EditText qty = (EditText) ((TableRow) view).getChildAt(4);
-                        Variables.Update_sales updateSalesobj = updateSales.get(j - 1);
-                        Json.put("sodetails_product_gid", updateSalesobj.product_id);
-                        Json.put("quantity", Integer.parseInt(qty.getText().toString()));
-                        Json.put("sodetails_gid", updateSalesobj.sodetails_gid);
-                        Json.put("soheader_gid", soheaderno);
-                        salearray.put(Json);
-                    }
+                    JSONObject Json = new JSONObject();
+                    //  EditText qty = (EditText) ((TableRow) viewtbl).getChildAt(4);
+                    Variables.Update_sales updateSalesobj = updateSales.get(j - 1);
+                    Json.put("sodetails_product_gid", updateSalesobj.product_id);
+                    // Json.put("quantity", Integer.parseInt(qty.getText().toString()));
+                    Json.put("sodetails_gid", updateSalesobj.sodetails_gid);
+                    Json.put("soheader_gid", soheaderno);
+                    salearray.put(Json);
+
                 }
                 saleJson.put("sodetails", salearray);
-                saleJson.put("schedule_gid", Sale_Schedule_gid);
+                if(Sale_Schedule_gid != 0) {
+                    saleJson.put("schedule_gid", Sale_Schedule_gid);
+                }
                 saleJson1.put("emp_gid", UserDetails.getUser_id());
                 saleJson1.put("custid", cust_gid);
                 saleJson1.put("data", saleJson);
-                saleJson1.put("ACTION", "Delete");
+                if(Sale_Schedule_gid != 0) {
+                    saleJson1.put("ACTION", "Delete");
+                }else{
+                    saleJson1.put("ACTION", "DIRECTSALE_DELETE");
+
+                }
                 params_Json.put("parms", saleJson1);
 
             } catch (JSONException e) {
                 e.printStackTrace();
             }
-
-            String URL = Constant.URL + "FET_SalesOrder?Emp_gid=" + UserDetails.getUser_id() +
-                    "&Entity_gid=1&Date=" + Common.convertDateString(new Date(), "dd-MMM-yyyy");
-
-            CallbackHandler.sendReqest(getActivity(), Request.Method.POST, params_Json.toString(), URL, new VolleyCallback() {
+            final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+            builder.setTitle("Confirm");
+            builder.setMessage("Are You Sure To Submit?");
+            builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
                 @Override
-                public void onSuccess(String result) {
-                    try {
-                        JSONObject jsonObject = new JSONObject(result);
-                        String status = jsonObject.getString("MESSAGE");
-                        if (status.equals("SUCCESS")) {
+                public void onClick(DialogInterface dialog, int which) {
+                    String URL = Constant.URL + "FET_SalesOrder?Emp_gid=" + UserDetails.getUser_id() +
+                            "&Entity_gid=1&Date=" + Common.convertDateString(new Date(), "dd-MMM-yyyy");
 
-                            Toast.makeText(getActivity(), "Sale Cancelled Succussfully.", Toast.LENGTH_LONG).show();
+                    CallbackHandler.sendReqest(getActivity(), Request.Method.POST, params_Json.toString(), URL, new VolleyCallback() {
+                        @Override
+                        public void onSuccess(String result) {
+                            try {
+                                JSONObject jsonObject = new JSONObject(result);
+                                String status = jsonObject.getString("MESSAGE");
+                                if (status.equals("SUCCESS")) {
 
-                        } else {
-                            Toast.makeText(getActivity(), "Error While Canceling.", Toast.LENGTH_LONG).show();
+                                    Toast.makeText(getActivity(), "Sale Cancelled Succussfully.", Toast.LENGTH_LONG).show();
+                                    getActivity().finish();
+                                } else {
+                                    Toast.makeText(getActivity(), "Error While Canceling.", Toast.LENGTH_LONG).show();
+                                }
+                            } catch (JSONException e) {
+                                Log.e("Sales", e.getMessage());
+                            }
                         }
-                    } catch (JSONException e) {
-                        Log.e("Sales", e.getMessage());
-                    }
-                }
 
-                @Override
-                public void onFailure(String result) {
-                    Log.e("Location", result);
+                        @Override
+                        public void onFailure(String result) {
+                            Log.e("Location", result);
 
+                        }
+                    });
                 }
             });
-
+            builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    dialog.dismiss();
+                }
+            });
+            builder.show();
 
         }
 
@@ -779,6 +818,67 @@ public class Sales_order extends Fragment implements View.OnClickListener {
         return "";
     }
 
+    public String Delete_submit() {
+        final String[] returnmsg = {"Delete Success"};
+        ;
+        final JSONArray salearray = new JSONArray();
+        JSONObject Json = new JSONObject();
+        JSONObject saleJson = new JSONObject();
+        JSONObject saleJson1 = new JSONObject();
+        JSONObject params_Json = new JSONObject();
+
+        for (i = 0; i < DeleteList.size(); i++) {
+            if (DeleteList.get(i) != 0) {
+                try {
+                    // Json.put("sodetails_product_gid", updateSalesobj.product_id);
+                    // Json.put("quantity", updateSalesobj.qty);
+                    Json.put("sodetails_gid", DeleteList.get(i));
+                    //Json.put("soheader_gid", soheaderno);
+                    salearray.put(Json);
+                    saleJson.put("sodetails", salearray);
+                    //saleJson.put("schedule_gid", Sale_Schedule_gid);
+                    saleJson1.put("emp_gid", UserDetails.getUser_id());
+                    saleJson1.put("custid", cust_gid);
+                    saleJson1.put("data", saleJson);
+                    saleJson1.put("ACTION", "Delete");
+                    params_Json.put("parms", saleJson1);
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+                String URL = Constant.URL + "FET_SalesOrder?Emp_gid=" + UserDetails.getUser_id() +
+                        "&Entity_gid=1&Date=" + Common.convertDateString(new Date(), "dd-MMM-yyyy");
+
+                CallbackHandler.sendReqest(getActivity(), Request.Method.POST, params_Json.toString(), URL, new VolleyCallback() {
+                    @Override
+                    public void onSuccess(String result) {
+                        try {
+                            JSONObject jsonObject = new JSONObject(result);
+                            String status = jsonObject.getString("MESSAGE");
+                            if (status.equals("SUCCESS")) {
+
+                                Toast.makeText(getActivity(), "Product Deleted Succussfully.", Toast.LENGTH_LONG).show();
+                                returnmsg[0] = "Delete Success";
+
+                            } else {
+                                Toast.makeText(getActivity(), "Error While Deleting.", Toast.LENGTH_LONG).show();
+                            }
+                        } catch (JSONException e) {
+                            Log.e("Sales", e.getMessage());
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(String result) {
+                        Log.e("Location", result);
+                        returnmsg[0] = "Delete Fail";
+                    }
+                });
+            }
+        }
+        return returnmsg[0];
+    }
 
     public interface OnFragmentInteractionListener {
 

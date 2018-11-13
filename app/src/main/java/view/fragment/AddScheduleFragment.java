@@ -18,6 +18,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.SearchView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -44,9 +45,13 @@ import models.CustomerFilterAdapter;
 import models.ListAdapter;
 import models.Variables;
 import presenter.NetworkResult;
+import view.activity.CommentActivity;
 import view.activity.CustomerDetailActivity;
 import view.activity.FilterAddScheduleActivity;
 import view.activity.HistoryActivity;
+
+import static android.app.Activity.RESULT_CANCELED;
+import static android.app.Activity.RESULT_OK;
 
 
 public class AddScheduleFragment extends Fragment implements View.OnClickListener {
@@ -64,7 +69,6 @@ public class AddScheduleFragment extends Fragment implements View.OnClickListene
     private RecyclerView recyclerView;
     private TextView empty_view, filter, employee;
     private ProgressDialog progressDialog;
-    private List<Variables.Customer> customerList;
     private List<Object> mCustomerFilter;
     private CustomerFilterAdapter adapter;
     private int filterCode = 101;
@@ -76,6 +80,7 @@ public class AddScheduleFragment extends Fragment implements View.OnClickListene
     private List<Variables.Details> empDetailList;
     private int selected_employee_gid;
     private List<Integer> employee_gid, route_gid, cluster_gid;
+    private SearchView customerSearch;
 
     public AddScheduleFragment() {
         // Required empty public constructor
@@ -124,7 +129,7 @@ public class AddScheduleFragment extends Fragment implements View.OnClickListene
 
     private void loadView() {
         recyclerView = (RecyclerView) fragmentView.findViewById(R.id.customer_AddSchedule_RecyclerView);
-
+        customerSearch = fragmentView.findViewById(R.id.customer_search);
         empty_view = fragmentView.findViewById(R.id.addSchedule_Empty_view);
         filter = fragmentView.findViewById(R.id.txtAddSchedule_Filter);
         employee = fragmentView.findViewById(R.id.txtEmployee);
@@ -136,9 +141,8 @@ public class AddScheduleFragment extends Fragment implements View.OnClickListene
         progressDialog.setCancelable(false);
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(this.getActivity()));
-
+        customerSearch.setQueryHint("Search");
         mCustomerFilter = new ArrayList<>();
-        customerList = new ArrayList<>();
         filter.setOnClickListener(this);
         employee.setOnClickListener(this);
         getData = new GetData(getActivity());
@@ -146,6 +150,19 @@ public class AddScheduleFragment extends Fragment implements View.OnClickListene
         employee_gid = new ArrayList<>();
         route_gid = new ArrayList<>();
         cluster_gid = new ArrayList<>();
+        customerSearch.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                filter(newText);
+                return true;
+            }
+        });
     }
 
     private void loadData() {
@@ -218,7 +235,10 @@ public class AddScheduleFragment extends Fragment implements View.OnClickListene
 
             @Override
             public void onCommentClick(Variables.Customer item, int position) {
-
+                Intent intent = new Intent(getActivity(), CommentActivity.class);
+                intent.putExtra("customer_gid", item.customer_gid);
+                intent.putExtra("customer_name", item.customer_name);
+                startActivity(intent);
             }
 
         });
@@ -229,6 +249,25 @@ public class AddScheduleFragment extends Fragment implements View.OnClickListene
         } else {
             setVisibility(View.VISIBLE, View.GONE, View.GONE);
         }
+    }
+
+    public void filter(String text) {
+        List<Object> temp = new ArrayList();
+        if (mCustomerFilter.size() > 0) {
+            for (Object d : mCustomerFilter) {
+                if (d instanceof Variables.Customer) {
+                    if (((Variables.Customer)d).customer_name.toLowerCase().replaceAll("\\s+", "").contains(text.toLowerCase().replaceAll("\\s+", ""))) {
+                        temp.add(d);
+                    }
+                } else {
+                    temp.add(d);
+                }
+
+            }
+            adapter.updateList(temp);
+        }
+
+
     }
 
     public void setVisibility(int recycleView, int emptyView, int reloadView) {
@@ -423,7 +462,7 @@ public class AddScheduleFragment extends Fragment implements View.OnClickListene
                 selected_employee_gid = empDetailList.get(position).gid;
                 employee.setText(empDetailList.get(position).data);
                 employeeDialog.dismiss();
-                employee_gid=new ArrayList<>();
+                employee_gid = new ArrayList<>();
                 employee_gid.add(selected_employee_gid);
                 loadData();
             }
@@ -432,7 +471,19 @@ public class AddScheduleFragment extends Fragment implements View.OnClickListene
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
+        if(requestCode == filterCode){
+
+            if (resultCode == RESULT_OK){
+
+               // tvResultCode.setText("RESULT_OK");
+
+            }else if(resultCode == RESULT_CANCELED){
+
+               // tvResultCode.setText("RESULT_CANCELED");
+
+            }
+
+        }
 
     }
 

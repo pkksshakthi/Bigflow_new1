@@ -1,10 +1,7 @@
 package models;
 
 
-import android.graphics.Color;
 import android.widget.EditText;
-
-import java.util.List;
 
 public class Variables {
     public static class Menulist {
@@ -26,7 +23,7 @@ public class Variables {
 
     public static class Customer {
 
-        public String customer_name, customer_location, isEditable,customer_sch_status;
+        public String customer_name, customer_location, isEditable, customer_sch_status;
         public int customer_gid;
         public boolean isSelected;
 
@@ -70,6 +67,12 @@ public class Variables {
         public String latlong_date;
         public int latlong_gid;
         public int entity_gid;
+    }
+
+    public static class DeviceInfo {
+        public String DeviceInfo_Date;
+        public String DeviceInfo_Data;
+        public int DeviceInfo_Gid;
     }
 
     public static class Product {
@@ -294,6 +297,8 @@ public class Variables {
         public int gid;
         public String data;
         public int dataColor;
+        public int Schedule_gid;
+        public String Salestatus;
     }
 
     public static class History {
@@ -303,88 +308,15 @@ public class Variables {
         public String followup;
     }
 
-    public static class StatusReview_List {
-        private String Customername;
-        private String Employeename;
-        private String type;
-        private String Status, Type;
-        private String Remark;
-        private int schedule_gid, soheader_gid, schedulereview_gid;
-        private String review_remarks, review_status, followup;
-
-        private boolean isSelected = false;
-
-        public StatusReview_List(String Customername, String Employeename,
-                                 String Status,
-                                 String Type, String Remark, int schedulereview_gid, String review_remarks,
-                                 String review_status, int schedule_gid, int soheader_gid, String followup) {
-            this.Customername = Customername;
-            this.Employeename = Employeename;
-            this.Status = Status;
-            this.Type = Type;
-
-            this.Remark = Remark;
-            this.schedulereview_gid = schedulereview_gid;
-            this.review_remarks = review_remarks;
-            this.review_status = review_status;
-            this.schedule_gid = schedule_gid;
-            this.soheader_gid = soheader_gid;
-            this.followup = followup;
-
-        }
-
-        public String getCustomername() {
-            return Customername;
-        }
-
-        public String getEmployeename() {
-            return Employeename;
-        }
-
-        public String getFollowup() {
-            return followup;
-        }
-
-        public String getRemark() {
-            return Remark;
-        }
-
-        public String getStatus() {
-            return Status;
-        }
-
-        public String getType() {
-            return Type;
-        }
-
-        public int getSchedulereview_gid() {
-            return schedulereview_gid;
-        }
-
-        public String getreview_remarks() {
-            return review_remarks;
-        }
-
-        public String getreview_status() {
-            return review_status;
-        }
-
-        public int getschedule_gid() {
-            return schedule_gid;
-        }
-
-        public int getSoheader_gid() {
-            return soheader_gid;
-        }
-
-        public boolean isSelected() {
-            return isSelected;
-        }
-
-        public void setSelected(boolean selected) {
-            isSelected = selected;
-        }
-
+    public static class StatusReview {
+        public String customer_name;
+        public String employee_name;
+        public String schedule_type, schedule_date, followup_date, followup_reason;
+        public String schedule_status;
+        public String remark;
+        public int schedule_gid, soheader_gid, schedulereview_gid;
+        public String review_remarks, review_status;
+        private boolean isSelected;
 
     }
 
@@ -443,14 +375,20 @@ public class Variables {
         private String Customername;
         private String Employeename;
         private Object jsonsalesdetail;
+        private Object jsonoutstngdetail;
+        private Object jsonpdcsdetail;
         private String soheader;
 
 
         public Approval_List(String Customername, String Employeename, Object jsonsalesdetail,
+                             Object jsonoutstngdetail,
+                             Object jsonpdcsdetail,
                              String soheader) {
             this.Customername = Customername;
             this.Employeename = Employeename;
             this.jsonsalesdetail = jsonsalesdetail;
+            this.jsonoutstngdetail = jsonoutstngdetail;
+            this.jsonpdcsdetail = jsonpdcsdetail;
             this.soheader = soheader;
         }
 
@@ -464,6 +402,14 @@ public class Variables {
 
         public Object getJsonsalesdetail() {
             return jsonsalesdetail;
+        }
+
+        public Object getJsonoutstngdetail() {
+            return jsonoutstngdetail;
+        }
+
+        public Object getJsonpdcsdetail() {
+            return jsonpdcsdetail;
         }
 
         public String getSoheader() {
@@ -490,10 +436,16 @@ public class Variables {
         }
     }
 
-    public static class Comment{
-        public String comment_message,comment_date,employee_name;
+    public static class Comment {
+        public String comment_message, comment_date, employee_name;
         public int comment_gid;
         public int employee_gid;
+    }
+
+    public static class SalesDetail {
+        public String soheader_gid, sodetail_gid, product_name;
+        public int product_quantity;
+        public double product_price, total_price;
     }
 
 }

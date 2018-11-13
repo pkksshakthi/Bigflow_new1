@@ -63,6 +63,7 @@ import view.fragment.RouteSummaryFragment;
 import view.fragment.ServiceSummaryFragment;
 import view.fragment.StatusReviewFragment;
 import view.fragment.SynchronizeFragment;
+import view.fragment.ViewtaskFragment;
 
 
 public class DashBoardActivity extends AppCompatActivity {
@@ -426,7 +427,7 @@ public class DashBoardActivity extends AppCompatActivity {
 
                 break;
             default:
-                fragment = EmployeeTrackingFragment.newInstance("Customers", "");
+                fragment = StatusReviewFragment.newInstance("Customers", "");
 
                 break;
         }

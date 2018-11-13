@@ -35,7 +35,7 @@
         <item name="android:textStyle">normal</item>
         <item name="android:textSize">15dp</item>
         <item name="android:textColor">@color/TextPrimary</item>
-        <item name="android:layout_margin">5dp</item>
+        <item name="android:padding">5dp</item>
     </style>
 
     <style name="SecondaryText">
@@ -49,7 +49,7 @@
         <item name="android:textStyle">normal</item>
         <item name="android:textSize">15dp</item>
         <item name="android:textColor">@color/colorPrimaryDark</item>
-        <item name="android:layout_margin">5dp</item>
+        <item name="android:padding">5dp</item>
     </style>
 
     <style name="SecondaryTextHilight">
@@ -59,26 +59,45 @@
         <item name="android:paddingLeft">5dp</item>
     </style>
 
+    <style name="FilterText">
+        <item name="android:textStyle">normal</item>
+        <item name="android:textSize">15dp</item>
+        <item name="android:textColor">@color/TextPrimary</item>
+        <item name="android:padding">5dp</item>
+        <item name="android:minHeight">@dimen/list_item_min_height</item>
+        <item name="android:layout_marginBottom">3dp</item>
+        <item name="android:gravity">center|left</item>
+    </style>
+
     <style name="MenuHeaderText">
         <item name="android:textStyle">normal</item>
         <item name="android:textSize">15dp</item>
         <item name="android:textColor">@color/colorPrimaryDark</item>
-        <item name="android:layout_margin">8dp</item>
+        <item name="android:padding">8dp</item>
     </style>
 
+    <style name="MenuItemText">
+        <item name="android:textStyle">normal</item>
+        <item name="android:textSize">14dp</item>
+        <item name="android:textColor">@color/TextSecondary</item>
+        <item name="android:layout_margin">5dp</item>
+    </style>
 
     <style name="ListHeaderText">
         <item name="android:textStyle">normal</item>
         <item name="android:textSize">15dp</item>
         <item name="android:textColor">@color/colorPrimaryDark</item>
-        <item name="android:layout_margin">5dp</item>
+        <item name="android:layout_marginTop">2dp</item>
+        <item name="android:padding">5dp</item>
+        <item name="android:minHeight">@dimen/list_item_min_height</item>
     </style>
 
     <style name="ListItemText">
         <item name="android:textStyle">normal</item>
         <item name="android:textSize">14dp</item>
         <item name="android:textColor">@color/TextSecondary</item>
-        <item name="android:layout_margin">5dp</item>
+        <item name="android:padding">5dp</item>
+        <item name="android:minHeight">@dimen/list_item_min_height</item>
     </style>
 
     <style name="HorizontalLine">

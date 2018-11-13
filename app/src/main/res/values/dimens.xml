@@ -6,4 +6,8 @@
     <dimen name="nav_header_height">176dp</dimen>
     <dimen name="fab_margin">16dp</dimen>
     <dimen name="divider_height">1dp</dimen>
+    <dimen name="list_item_min_height">30dp</dimen>
+
+    <!--Base Recyclerview-->
+    <dimen name="brv_margin">3dp</dimen>
 </resources>

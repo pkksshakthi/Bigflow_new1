@@ -10,7 +10,7 @@
         android:id="@+id/post_card_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="3dp"
+        android:layout_marginBottom="3dp"
         app:cardElevation="2dp">
 
         <RelativeLayout
@@ -64,6 +64,28 @@
                     android:drawableLeft="@drawable/ic_action_list"
                     android:gravity="center|left"
                     android:text="View Sales"
+                    android:tooltipText="Comment" />
+
+                <TextView
+                    android:id="@+id/txtCustViewOutstndg"
+                    style="@style/SecondaryText"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:drawableLeft="@drawable/ic_action_list"
+                    android:gravity="center|left"
+                    android:text="Outstanding"
+                    android:tooltipText="Comment" />
+
+                <TextView
+                    android:id="@+id/txtCustViewpdc"
+                    style="@style/SecondaryText"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:drawableLeft="@drawable/ic_action_list"
+                    android:gravity="center|left"
+                    android:text="View PDC"
                     android:tooltipText="Comment" />
             </LinearLayout>
 

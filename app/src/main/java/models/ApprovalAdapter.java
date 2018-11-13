@@ -61,16 +61,27 @@ public class ApprovalAdapter extends RecyclerView.Adapter<ApprovalAdapter.Custom
 
     public Variables.Approval_List getitem(int position) {
         return StausList.get(position);
+
+    }
+
+    public void removeAt(int position) {
+        StausList.remove(position);
+        notifyItemRemoved(position);
+        notifyItemRangeChanged(position, StausList.size());
     }
 
     public interface OnItemClickListener {
         void onItemClick(Variables.Approval_List item, int position);
 
         void onViewSalesClick(Variables.Approval_List item, int position);
+
+        void onViewoutClick(Variables.Approval_List item, int position);
+
+        void onViewPdcClick(Variables.Approval_List item, int position);
     }
 
     public class CustomerViewHolder extends RecyclerView.ViewHolder {
-        TextView customerName, EmployeeName, ViewSale;
+        TextView customerName, EmployeeName, ViewSale, ViewOutstndng, ViewPDC;
         CardView post_card_view;
 
         private View view;
@@ -82,6 +93,8 @@ public class ApprovalAdapter extends RecyclerView.Adapter<ApprovalAdapter.Custom
             customerName = itemView.findViewById(R.id.txtCustomerName);
             EmployeeName = itemView.findViewById(R.id.txtEmployeeName);
             ViewSale = itemView.findViewById(R.id.txtCustViewSales);
+            ViewOutstndng = itemView.findViewById(R.id.txtCustViewOutstndg);
+            ViewPDC = itemView.findViewById(R.id.txtCustViewpdc);
 
 
             itemView.setOnClickListener(new View.OnClickListener() {
@@ -93,6 +106,7 @@ public class ApprovalAdapter extends RecyclerView.Adapter<ApprovalAdapter.Custom
 
                         if (position != RecyclerView.NO_POSITION) {
                             listener.onItemClick(getitem(position), position);
+
                         }
                     }
 
@@ -106,6 +120,30 @@ public class ApprovalAdapter extends RecyclerView.Adapter<ApprovalAdapter.Custom
                         int position = getAdapterPosition();
                         if (position != RecyclerView.NO_POSITION) {
                             listener.onViewSalesClick(getitem(position), position);
+                        }
+                    }
+                }
+            });
+
+            ViewOutstndng.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (listener != null) {
+                        int position = getAdapterPosition();
+                        if (position != RecyclerView.NO_POSITION) {
+                            listener.onViewoutClick(getitem(position), position);
+                        }
+                    }
+                }
+            });
+
+            ViewPDC.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (listener != null) {
+                        int position = getAdapterPosition();
+                        if (position != RecyclerView.NO_POSITION) {
+                            listener.onViewPdcClick(getitem(position), position);
                         }
                     }
                 }

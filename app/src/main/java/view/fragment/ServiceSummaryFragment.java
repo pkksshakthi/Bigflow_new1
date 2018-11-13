@@ -6,25 +6,21 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.text.method.PasswordTransformationMethod;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.CheckBox;
-import android.widget.CompoundButton;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.SearchView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -43,10 +39,10 @@ import org.json.JSONObject;
 import java.text.DateFormatSymbols;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 
 import constant.Constant;
 import models.Common;
-import models.CustomerAdapter;
 import models.ServiceSummryAdapter;
 import models.UserDetails;
 import models.Variables;
@@ -68,7 +64,7 @@ public class ServiceSummaryFragment extends Fragment implements View.OnClickList
     private ProgressDialog progressDialog;
     private FloatingActionButton Courier;
     private ArrayList<Variables.Courier> courierList = new ArrayList<>();
-    private ArrayList<Variables.ServiceSummary_List> customerList;
+    private ArrayList<Variables.ServiceSummary_List> serviceList;
     private Spinner spnCourier, spnmode, spnsendto;
     private EditText txtdate, txtpacket, edtweight, AWB_no;
     private int mYear, mMonth, mDay;
@@ -94,6 +90,7 @@ public class ServiceSummaryFragment extends Fragment implements View.OnClickList
 
         }
     };
+    private SearchView customerSearch;
 
     public static ServiceSummaryFragment newInstance(String Title, String param2) {
         ServiceSummaryFragment fragment = new ServiceSummaryFragment();
@@ -131,6 +128,8 @@ public class ServiceSummaryFragment extends Fragment implements View.OnClickList
     private void loadView(View view) {
         linearLayout = (LinearLayout) view.findViewById(R.id.linearDirect);
         recyclerView = (RecyclerView) view.findViewById(R.id.ServiceRecyclerView);
+        customerSearch = fragmentView.findViewById(R.id.customer_search);
+        customerSearch.setQueryHint("Search");
         empty_view = view.findViewById(R.id.empty_view);
         reload = view.findViewById(R.id.custReload);
         Courier = view.findViewById(R.id.Couriericon);
@@ -233,7 +232,7 @@ public class ServiceSummaryFragment extends Fragment implements View.OnClickList
                     try {
                         dispatchobj.put("courier_gid", courierset.getCourierid());
                         dispatchobj.put("Dispatch_date", courierset.getDate());
-                        dispatchobj.put("send_by", Integer.parseInt(UserDetails.getUser_id()));
+                        dispatchobj.put("send_by", UserDetails.getUser_id());
                         dispatchobj.put("awbno", courierset.getAWB_no());
                         dispatchobj.put("dispatch_mode", courierset.getMode());
                         dispatchobj.put("dispatch_type", "Ndoc");
@@ -268,7 +267,7 @@ public class ServiceSummaryFragment extends Fragment implements View.OnClickList
                     Toast.makeText(getContext(), "Fill All The Field", Toast.LENGTH_LONG).show();
                 }
                 final JSONArray SRarray = new JSONArray();
-                for (Variables.ServiceSummary_List productdtl : customerList) {
+                for (Variables.ServiceSummary_List productdtl : serviceList) {
                     JSONObject objDetails = new JSONObject();
 
                     if (productdtl.isSelected()) {
@@ -316,9 +315,9 @@ public class ServiceSummaryFragment extends Fragment implements View.OnClickList
 
             @Override
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                if (AWB_no.getText().toString().length() > 0 && txtpacket.getText().toString().length() >0
-                        && edtweight.getText().toString().length() >0 &&
-                        txtdate.getText().toString().length()>0) {
+                if (AWB_no.getText().toString().length() > 0 && txtpacket.getText().toString().length() > 0
+                        && edtweight.getText().toString().length() > 0 &&
+                        txtdate.getText().toString().length() > 0) {
                     ((AlertDialog) dialog).getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(true);
 
                 } else {
@@ -339,9 +338,9 @@ public class ServiceSummaryFragment extends Fragment implements View.OnClickList
 
             @Override
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                if (AWB_no.getText().toString().length() > 0 && txtpacket.getText().toString().length() >0
-                        && edtweight.getText().toString().length() >0 &&
-                        txtdate.getText().toString().length()>0) {
+                if (AWB_no.getText().toString().length() > 0 && txtpacket.getText().toString().length() > 0
+                        && edtweight.getText().toString().length() > 0 &&
+                        txtdate.getText().toString().length() > 0) {
                     ((AlertDialog) dialog).getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(true);
 
                 } else {
@@ -362,9 +361,9 @@ public class ServiceSummaryFragment extends Fragment implements View.OnClickList
 
             @Override
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                if (AWB_no.getText().toString().length() > 0 && txtpacket.getText().toString().length() >0
-                        && edtweight.getText().toString().length() >0 &&
-                        txtdate.getText().toString().length()>0) {
+                if (AWB_no.getText().toString().length() > 0 && txtpacket.getText().toString().length() > 0
+                        && edtweight.getText().toString().length() > 0 &&
+                        txtdate.getText().toString().length() > 0) {
                     ((AlertDialog) dialog).getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(true);
 
                 } else {
@@ -385,9 +384,9 @@ public class ServiceSummaryFragment extends Fragment implements View.OnClickList
 
             @Override
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                if (AWB_no.getText().toString().length() > 0 && txtpacket.getText().toString().length() >0
-                        && edtweight.getText().toString().length() >0 &&
-                        txtdate.getText().toString().length()>0) {
+                if (AWB_no.getText().toString().length() > 0 && txtpacket.getText().toString().length() > 0
+                        && edtweight.getText().toString().length() > 0 &&
+                        txtdate.getText().toString().length() > 0) {
                     ((AlertDialog) dialog).getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(true);
 
                 } else {
@@ -407,7 +406,7 @@ public class ServiceSummaryFragment extends Fragment implements View.OnClickList
         sessiondata = new Bundle();
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(this.getActivity()));
-        customerList = new ArrayList<Variables.ServiceSummary_List>();
+        serviceList = new ArrayList<Variables.ServiceSummary_List>();
         reload.setOnClickListener(this);
         progressDialog = new ProgressDialog(getContext());
         progressDialog.setTitle(getResources().getString(R.string.loading));
@@ -416,7 +415,7 @@ public class ServiceSummaryFragment extends Fragment implements View.OnClickList
             @Override
             public void onClick(View view) {
                 int count = 0;
-                for (Variables.ServiceSummary_List productdtl : customerList) {
+                for (Variables.ServiceSummary_List productdtl : serviceList) {
                     if (productdtl.isSelected()) {
                         count = 1;
                         break;
@@ -429,6 +428,19 @@ public class ServiceSummaryFragment extends Fragment implements View.OnClickList
                     Toast.makeText(getActivity(), "Select Atleat One Product", Toast.LENGTH_LONG).show();
 
                 }
+            }
+        });
+        customerSearch.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                filter(newText);
+                return true;
             }
         });
     }
@@ -496,7 +508,7 @@ public class ServiceSummaryFragment extends Fragment implements View.OnClickList
                             }
                             String service_courierexp = obj_json.getString("service_courierexp");
 
-                            customerList.add(new Variables.ServiceSummary_List(display_name, product_name,
+                            serviceList.add(new Variables.ServiceSummary_List(display_name, product_name,
                                     Date, service_gid, product_gid, productslno, remark, service_courierexp));
                         }
 
@@ -527,7 +539,7 @@ public class ServiceSummaryFragment extends Fragment implements View.OnClickList
 
     public void setAdapter() {
 
-        adapter = new ServiceSummryAdapter(getActivity(), customerList);
+        adapter = new ServiceSummryAdapter(getActivity(), serviceList);
         recyclerView.setAdapter(adapter);
 
         progressDialog.dismiss();
@@ -570,11 +582,12 @@ public class ServiceSummaryFragment extends Fragment implements View.OnClickList
                     String message = json.getString("MESSAGE");
                     if (message.equals("SUCCESS")) {
                         Toast.makeText(getContext(), "Dispatched Successfully", Toast.LENGTH_LONG).show();
-                        customerList.clear();
+                        serviceList.clear();
                         loadData();
 
                     }
-                }catch (Exception e){}
+                } catch (Exception e) {
+                }
                 Log.e("Service", result);
                 progressDialog.dismiss();
             }
@@ -632,5 +645,20 @@ public class ServiceSummaryFragment extends Fragment implements View.OnClickList
         });
 
         return "";
+    }
+
+    public void filter(String text) {
+        List<Variables.ServiceSummary_List> temp = new ArrayList();
+        if (serviceList.size() > 0) {
+            for (Variables.ServiceSummary_List d : serviceList) {
+
+                if (d.getCustomername().toLowerCase().replaceAll("\\s+", "").contains(text.toLowerCase().replaceAll("\\s+", ""))) {
+                    temp.add(d);
+                }
+            }
+            adapter.updateList(temp);
+        }
+
+
     }
 }

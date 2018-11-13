@@ -37,7 +37,7 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.CommentV
         Variables.Comment details = mCommentList.get(position);
         holder.txtMessage.setText(details.comment_message);
         holder.txtTime.setText(details.employee_name+"@"+details.comment_date);
-        if (details.employee_gid != Integer.parseInt(UserDetails.getUser_id())) {
+        if (details.employee_gid != UserDetails.getUser_id()) {
             LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
             layoutParams.gravity = Gravity.LEFT;
             holder.txtMessage.setLayoutParams(layoutParams);

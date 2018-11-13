@@ -30,7 +30,8 @@ import constant.Constant;
 import models.Common;
 import models.UserDetails;
 import presenter.UserSessionManager;
-import view.activity.LoginActivity;
+import models.LocationSync;
+
 
 public class LocationService extends Service implements LocationListener {
     private static final long MIN_DISTANCE_CHANGE_FOR_UPDATES = 10;
@@ -72,15 +73,16 @@ public class LocationService extends Service implements LocationListener {
         mHandler = new Handler();
         mTimer = new Timer();
         mTimer.schedule(new TimerTaskToGetLocation(), 5, notify_interval);
+
     }
 
     private void loadData(JSONObject jsonObject) throws JSONException {
 
         UserDetails.setUser_code(jsonObject.getString("employee_code"));
         UserDetails.setToday_date(jsonObject.getString("date"));
-        UserDetails.setUser_id(jsonObject.getString("employee_gid"));
+        UserDetails.setUser_id(jsonObject.getInt("employee_gid"));
         UserDetails.setUser_name(jsonObject.getString("employee_name"));
-        UserDetails.setEntity_gid(jsonObject.getString("entity_gid"));
+        UserDetails.setEntity_gid(jsonObject.getInt("entity_gid"));
     }
 
     @Override
@@ -109,6 +111,8 @@ public class LocationService extends Service implements LocationListener {
         locationManager = (LocationManager) getApplicationContext().getSystemService(LOCATION_SERVICE);
         isGPSEnable = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
         isNetworkEnable = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+//        For Test Version
+        isNetworkEnable = false;
 
         if (!isGPSEnable && !isNetworkEnable) {
             Toast.makeText(this, "Enable the GPS access", Toast.LENGTH_LONG).show();
@@ -116,14 +120,14 @@ public class LocationService extends Service implements LocationListener {
 
         } else if (isNetworkEnable) {
             location = null;
-            locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000, 0, this);
+            locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000, 100, this);
             if (locationManager != null) {
                 location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
             }
 
         } else if (isGPSEnable) {
             location = null;
-            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 0, this);
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
             if (locationManager != null) {
                 location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
             }
@@ -159,7 +163,7 @@ public class LocationService extends Service implements LocationListener {
     }
 
     private void setLatLong(Location location) {
-        Log.e("ponraj", "running");
+
         if (location != null) {
             DataBaseHandler dataBaseHandler = new DataBaseHandler(LocationService.this);
 
@@ -175,6 +179,7 @@ public class LocationService extends Service implements LocationListener {
             if (!"SUCCESS".equals(Out_Message)) {
                 Log.e("Error", "Error On Lat Long Save.");
             }
+            LocationSync.LatLongSet(LocationService.this);
 
         }
 
@@ -218,6 +223,8 @@ public class LocationService extends Service implements LocationListener {
 
                     if (session.isUserLoggedIn()) {
                         fn_getlocation();
+
+
                     }
 
                 }
@@ -225,4 +232,6 @@ public class LocationService extends Service implements LocationListener {
 
         }
     }
+
+
 }

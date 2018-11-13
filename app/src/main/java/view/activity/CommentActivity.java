@@ -140,7 +140,7 @@ public class CommentActivity extends AppCompatActivity implements View.OnClickLi
                 @Override
                 public void handlerResult(String result) {
                     Variables.Comment comment = new Variables.Comment();
-                    comment.employee_gid = Integer.parseInt(UserDetails.getUser_id());
+                    comment.employee_gid = UserDetails.getUser_id();
                     comment.employee_name = UserDetails.getUser_name();
                     comment.comment_date = Common.convertDateString(new Date(), "yyyy/MM/dd hh:mm:ss");
                     comment.comment_message = etxMessage.getText().toString();

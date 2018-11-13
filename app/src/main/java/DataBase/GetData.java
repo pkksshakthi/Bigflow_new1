@@ -2,11 +2,9 @@ package DataBase;
 
 import android.content.ContentValues;
 import android.content.Context;
-import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.graphics.Color;
 import android.util.Log;
 
 import com.android.volley.Request;
@@ -14,7 +12,6 @@ import com.chootdev.csnackbar.Align;
 import com.chootdev.csnackbar.Duration;
 import com.chootdev.csnackbar.Snackbar;
 import com.chootdev.csnackbar.Type;
-import com.vsolv.bigflow.R;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -182,7 +179,7 @@ public class GetData {
         JSONObject jsonObject = new JSONObject();
         try {
             List<Integer> list = new ArrayList<>();
-            list.add(Integer.parseInt(UserDetails.getEntity_gid()));
+            list.add(UserDetails.getEntity_gid());
             JSONObject jsonObject1 = new JSONObject();
             jsonObject1.put("entity_gid", new JSONArray(list));
             jsonObject1.put("client_gid", new JSONArray());
@@ -274,6 +271,9 @@ public class GetData {
                                         Variables.Details details = new Variables.Details();
                                         details.data = sales_json.getString("SO_NO");
                                         details.gid = sales_json.getInt("SO_Gid");
+                                        String S_gid = sales_json.getString("Schedule_Gid");
+                                        details.Schedule_gid = Integer.parseInt(S_gid);
+                                        details.Salestatus = sales_json.getString("Status");
                                         //details.dataColor=mContext.getResources().getColor(R.color.success);
                                         detailsList.add(details);
                                     }
@@ -877,4 +877,179 @@ public class GetData {
         });
 
     }
+
+    public List<Variables.StatusReview> getStatusReview(int employee_gid, int customer_gid, int scheduletype_gid,
+                                                        int customergroup_gid, int location_gid, final NetworkResult networkResult) {
+        final List<Variables.StatusReview> mStatusReviewList;
+        mStatusReviewList = new ArrayList<>();
+
+        URL = Constant.URL + "FET_Review?Action=SCHEDULE_SUMMARY";
+
+        JSONObject Json = new JSONObject();
+        JSONObject filter_Json = new JSONObject();
+        JSONObject classif_Json = new JSONObject();
+
+        try {
+            filter_Json.put("fromdate", null);
+            filter_Json.put("todate", null);
+            filter_Json.put("followUp_fromdate", null);
+            filter_Json.put("followUp_todate", null);
+            filter_Json.put("reschedule_fromdate", null);
+            filter_Json.put("reschedule_todate", null);
+            filter_Json.put("employee_gid", employee_gid);
+            filter_Json.put("customer_gid", customer_gid);
+            filter_Json.put("scheduletype_gid", scheduletype_gid);
+            filter_Json.put("customergroup_gid", customergroup_gid);
+            filter_Json.put("location_gid", location_gid);
+            filter_Json.put("login_emp_gid", UserDetails.getUser_id());
+
+            JSONArray entity = new JSONArray();
+            JSONArray client = new JSONArray();
+
+            classif_Json.put("entity_gid", entity.put(UserDetails.getEntity_gid()));
+            classif_Json.put("client_gid", client);
+
+            Json.put("Filter", filter_Json);
+            Json.put("Classification", classif_Json);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        CallbackHandler.sendReqest(mContext, Request.Method.POST, Json.toString(), URL, new VolleyCallback() {
+            @Override
+            public void onSuccess(String result) {
+
+                try {
+                    JSONObject jsonObject = new JSONObject(result);
+                    String message = jsonObject.getString("MESSAGE");
+
+                    if (message.equals("FOUND")) {
+                        JSONArray jsonArray = jsonObject.getJSONArray("DATA");
+
+                        for (int i = 0; i < jsonArray.length(); i++) {
+                            Variables.StatusReview statusReview = new Variables.StatusReview();
+                            JSONObject obj_json = jsonArray.getJSONObject(i);
+                            statusReview.customer_name = obj_json.getString("customer_name");
+                            statusReview.employee_name = obj_json.getString("employee_name");
+                            statusReview.schedule_type = obj_json.getString("scheduletype_name");
+                            statusReview.schedule_date = obj_json.getString("schedule_date");
+                            statusReview.schedule_status = obj_json.getString("schedule_status");
+                            statusReview.followup_date = obj_json.getString("schedule_followup_date");
+                            statusReview.review_remarks = obj_json.getString("schedulereview_remarks");
+                            statusReview.followup_reason = obj_json.getString("followupreason_name");
+                            statusReview.soheader_gid = obj_json.optInt("ref_gid", 0);
+
+                            mStatusReviewList.add(statusReview);
+                        }
+
+                    }
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+
+                } finally {
+                    networkResult.handlerResult(result);
+                }
+
+
+            }
+
+            @Override
+            public void onFailure(String result) {
+                if (result.equals("NoConnectionError"))
+                    ShowSnakbar(Type.WARNING, "Please Check Internet Connection.");
+                networkResult.handlerError("ERROR");
+                Log.e("Getdata-statusReview", result);
+            }
+        });
+        return mStatusReviewList;
+    }
+
+    public List<Variables.SalesDetail> getSalesDetails(int soheader_gid, final NetworkResult networkResult) {
+        final List<Variables.SalesDetail> mSalesDetails;
+        mSalesDetails = new ArrayList<>();
+
+        URL = Constant.URL + "FET_SalesOrder_Get?SO_Header_gid=" + soheader_gid + "&Entity_gid=1&Action=BY_REF_GID";
+
+        CallbackHandler.sendReqest(mContext, Request.Method.GET, "", URL, new VolleyCallback() {
+            @Override
+            public void onSuccess(String result) {
+
+                try {
+                    JSONObject jsonObject = new JSONObject(result);
+                    String status = jsonObject.getString("MESSAGE");
+                    if (status.equals("FOUND")) {
+
+                        JSONArray jsonsales;
+                        jsonsales = jsonObject.getJSONArray("DATA");
+
+                        for (int i = 0; i < jsonsales.length(); i++) {
+                            JSONObject obj_json = jsonsales.getJSONObject(i);
+                            Variables.SalesDetail salesDetail = new Variables.SalesDetail();
+                            salesDetail.soheader_gid = obj_json.getString("soheader_no");
+                            salesDetail.product_name = obj_json.getString("product_name");
+                            salesDetail.product_quantity = obj_json.getInt("quantity");
+                            salesDetail.product_price = obj_json.getInt("sodetails_amount");
+                            salesDetail.total_price = obj_json.getInt("sodetails_total");
+
+                            mSalesDetails.add(salesDetail);
+                        }
+
+                    }
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+
+                } finally {
+                    networkResult.handlerResult(result);
+                }
+
+
+            }
+
+            @Override
+            public void onFailure(String result) {
+                if (result.equals("NoConnectionError"))
+                    ShowSnakbar(Type.WARNING, "Please Check Internet Connection.");
+                networkResult.handlerError("ERROR");
+                Log.e("Getdata-statusReview", result);
+            }
+        });
+        return mSalesDetails;
+    }
+
+    // To Set the Device Info.....................................
+    public String SetDeviceInfo(int employee_gid, JSONObject jsonObject, Date device_datetime, final NetworkResult networkResult) {
+        URL = Constant.URL + "DeviceDetails?Emp_Gid=" + employee_gid;
+        URL = URL + "&Entity_Gid=" + UserDetails.getEntity_gid();
+        URL = URL + "&Action=" + "DEVICEDETAILS_SET";
+
+
+//        CallbackHandler.sendReqest(mContext, Request.Method.POST, jsonObject.toString(), URL, new VolleyCallback() {
+//            @Override
+//            public void onSuccess(String result) {
+//
+//                try {
+//                    JSONObject jsonObject = new JSONObject(result);
+//                    String status = jsonObject.getString("MESSAGE");
+//                    networkResult.handlerResult(status);
+//                } catch (JSONException e) {
+//                    Log.e("Login", e.getMessage());
+//                }
+//
+//            }
+//
+//            @Override
+//            public void onFailure(String result) {
+//                if (result.equals("NoConnectionError"))
+//                    ShowSnakbar(Type.WARNING, "Please Check Internet Connection.");
+//                networkResult.handlerError("ERROR");
+//                Log.e("SetScheduleSingle", result);
+//
+//            }
+//        });
+        return "SUCCESS";
+    }
+
+
 }

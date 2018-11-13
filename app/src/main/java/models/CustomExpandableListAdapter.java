@@ -44,7 +44,7 @@ public class CustomExpandableListAdapter extends BaseExpandableListAdapter {
                              boolean isLastChild, View convertView, ViewGroup parent) {
         final String expandedListText = (String) getChild(listPosition, expandedListPosition);
         if (convertView == null) {
-            convertView = mLayoutInflater.inflate(R.layout.list_menu_item, null);
+            convertView = mLayoutInflater.inflate(R.layout.list_menu_item, parent,false);
         }
         TextView expandedListTextView = convertView.findViewById(R.id.expandedListItem);
         expandedListTextView.setText(expandedListText);
@@ -77,7 +77,7 @@ public class CustomExpandableListAdapter extends BaseExpandableListAdapter {
                              View convertView, ViewGroup parent) {
         String listTitle = (String) getGroup(listPosition);
         if (convertView == null) {
-            convertView = mLayoutInflater.inflate(R.layout.list_group, null);
+            convertView = mLayoutInflater.inflate(R.layout.list_group, parent,false);
         }
         TextView listTitleTextView = convertView.findViewById(R.id.listTitle);
         ImageView indicator = convertView.findViewById(R.id.group_indicator);

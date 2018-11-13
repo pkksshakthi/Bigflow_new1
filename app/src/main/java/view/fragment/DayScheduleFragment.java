@@ -176,7 +176,7 @@ public class DayScheduleFragment extends Fragment {
             return;
         }
 
-        customerList = getData.ScheduledCustomerList(Integer.parseInt(UserDetails.getUser_id()), Common.convertDateString(new Date(), "yyyy-MM-dd"), new NetworkResult() {
+        customerList = getData.ScheduledCustomerList(UserDetails.getUser_id(), Common.convertDateString(new Date(), "yyyy-MM-dd"), new NetworkResult() {
             @Override
             public void handlerResult(String result) {
                 setAdapter();
@@ -328,6 +328,8 @@ public class DayScheduleFragment extends Fragment {
             Variables.Details details = new Variables.Details();
             details.data = "New Sales";
             details.gid = 0;
+            details.Schedule_gid = 0;
+            details.Salestatus = "";
             details.dataColor = getActivity().getResources().getColor(R.color.colorAccent);
             detailsList.add(detailsList.size(), details);
             alertDialog.cancel();
@@ -347,9 +349,15 @@ public class DayScheduleFragment extends Fragment {
             listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                    sessiondata.putLong("sales_gid", listAdapter.getItemId(position));
+                    Variables.Details details_toactivity = (Variables.Details) listAdapter.getItem(position);
+                    sessiondata.putInt("soheader_no", details_toactivity.gid);
+                    sessiondata.putInt("Sale_Schedule_gid", details_toactivity.Schedule_gid);
+                    sessiondata.putString("Status", details_toactivity.Salestatus);
+                    //sessiondata.putLong("sales_gid", listAdapter.getItemId(position));
                     salesDialog.cancel();
-                    gotoActivity(SalesActivity.class);
+                    if (details_toactivity.Salestatus != "CANCELLED") {
+                        gotoActivity(SalesActivity.class);
+                    }
                 }
             });
 

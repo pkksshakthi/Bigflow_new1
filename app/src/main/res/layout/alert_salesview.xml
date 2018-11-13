@@ -12,7 +12,7 @@
         style="@style/PrimaryTextHilight"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Sales" />
+        android:text="SALES" />
 
 
     <TableLayout
@@ -22,6 +22,14 @@
         android:layout_height="wrap_content">
 
     </TableLayout>
+    <TextView
+        android:id="@+id/txt_SaleTtl"
+        style="@style/PrimaryTextHilight"
+        android:gravity="center|right"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="SalesTtl" />
+
 
 
 </LinearLayout>

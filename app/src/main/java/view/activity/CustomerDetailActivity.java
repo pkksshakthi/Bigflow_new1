@@ -76,7 +76,7 @@ public class CustomerDetailActivity extends AppCompatActivity {
         try {
             params_Json.put(Constant.Action, "Common");
             params_Json.put("customer_gid", customer_gid);
-            params_Json.put(Constant.emp_gid, Integer.parseInt(UserDetails.getUser_id()));
+            params_Json.put(Constant.emp_gid, UserDetails.getUser_id());
             params_Json.put("Outstanding_Group", "outstandingcustomer");
             Full_Json.put(Constant.params, params_Json);
 

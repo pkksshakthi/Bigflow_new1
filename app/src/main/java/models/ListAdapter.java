@@ -28,7 +28,7 @@ public class ListAdapter extends BaseAdapter {
     }
 
     @Override
-    public Object getItem(int position) {
+    public Variables.Details getItem(int position) {
         return mListDetails.get(position);
     }
 
@@ -42,7 +42,7 @@ public class ListAdapter extends BaseAdapter {
     public View getView(int position, View convertView, ViewGroup parent) {
         if (convertView == null) {
             LayoutInflater inflater = LayoutInflater.from(mContext);
-            convertView = inflater.inflate(R.layout.list_item, null);
+            convertView = inflater.inflate(R.layout.list_item, parent, false);
         }
         TextView itemText = convertView.findViewById(R.id.txtList_item);
         itemText.setText(mListDetails.get(position).data);

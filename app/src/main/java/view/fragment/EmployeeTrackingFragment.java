@@ -143,7 +143,7 @@ public class EmployeeTrackingFragment extends Fragment {
             progressDialog.cancel();
             return;
         }
-        employeeList = getData.EmployeeList(Integer.parseInt(UserDetails.getUser_id()), new NetworkResult() {
+        employeeList = getData.EmployeeList(UserDetails.getUser_id(), new NetworkResult() {
             @Override
             public void handlerResult(String result) {
                 setAdapter();

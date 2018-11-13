@@ -22,6 +22,8 @@
     <string name="error_loading">Error on Loading.!</string>
     <string name="Promise_to_buy">Promise to Buy</string>
     <string name="Promise_to_pay">Promise to Pay</string>
+    <string name="from_date">From Date</string>
+    <string name="to_date">To Date</string>
 
     <!--Company Details-->
     <string name="company_name">Vsolv Engineering India Pvt Ltd</string>

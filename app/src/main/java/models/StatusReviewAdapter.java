@@ -18,10 +18,10 @@ import java.util.List;
 
 public class StatusReviewAdapter extends RecyclerView.Adapter<StatusReviewAdapter.CustomerViewHolder> {
     private Context mCtx;
-    private List<Variables.StatusReview_List> StausList;
+    private List<Variables.StatusReview> StausList;
     private OnItemClickListener mListener;
 
-    public StatusReviewAdapter(Context mCtx, List<Variables.StatusReview_List> List) {
+    public StatusReviewAdapter(Context mCtx, List<Variables.StatusReview> List) {
         this.mCtx = mCtx;
         this.StausList = List;
     }
@@ -41,24 +41,19 @@ public class StatusReviewAdapter extends RecyclerView.Adapter<StatusReviewAdapte
     @Override
     public void onBindViewHolder(@NonNull final CustomerViewHolder holder, int position) {
 
-        final Variables.StatusReview_List customer = StausList.get(position);
+        final Variables.StatusReview statusReview = StausList.get(position);
 
-        holder.customerName.setText(customer.getCustomername());
-        holder.EmployeeName.setText(customer.getEmployeename());
-        holder.type.setText(customer.getType());
-        if(customer.getFollowup() == "Sales" ){
-            holder.followup.setText(customer.getFollowup());
-        }else{
-            holder.followup.setVisibility(View.GONE);
-        }
+        holder.customerName.setText(statusReview.customer_name);
+        holder.EmployeeName.setText(statusReview.employee_name);
+        holder.sch_type.setText(statusReview.schedule_type);
+        holder.sch_date.setText(statusReview.schedule_date);
+        holder.sch_status.setText(statusReview.schedule_status + "-" + statusReview.followup_reason);
+        holder.followup_date.setText(statusReview.followup_date);
 
-        if (customer.getStatus().equals("OPEND")) {
-            holder.customerName.setTextColor(Color.parseColor("#326914"));
-           // ((CardView) holder.post_card_view).setBackgroundResource(R.color.lightgreen);
+        if (statusReview.schedule_status.equals("CLOSED") && statusReview.followup_reason.equals("Sales")) {
+            holder.sch_type.setTextColor(mCtx.getResources().getColor(R.color.colorAccent));
         } else {
-            holder.customerName.setTextColor(Color.parseColor("#9b2c1f"));
-
-            //    ((CardView) holder.post_card_view).setBackgroundResource(R.color.lightred);
+            holder.sch_type.setTextColor(mCtx.getResources().getColor(R.color.TextSecondary));
         }
 
     }
@@ -68,37 +63,35 @@ public class StatusReviewAdapter extends RecyclerView.Adapter<StatusReviewAdapte
         return StausList.size();
     }
 
-    public void updateList(List<Variables.StatusReview_List> list) {
+    public void updateList(List<Variables.StatusReview> list) {
         StausList = list;
         notifyDataSetChanged();
     }
 
-    public Variables.StatusReview_List getitem(int position) {
+    public Variables.StatusReview getitem(int position) {
         return StausList.get(position);
     }
 
     public interface OnItemClickListener {
-        void onItemClick(Variables.StatusReview_List item, int position);
-        void TypeClick(Variables.StatusReview_List item, int position);
+        void onItemClick(Variables.StatusReview item, int position);
+
+        void TypeClick(Variables.StatusReview item, int position);
 
 
     }
 
     public class CustomerViewHolder extends RecyclerView.ViewHolder {
-        TextView customerName, EmployeeName, type,followup;
-        CardView post_card_view;
-        ImageView Approveimg;
-        private View view;
+        TextView customerName, EmployeeName, sch_type, sch_date, sch_status, followup_date;
 
         public CustomerViewHolder(View itemView, final OnItemClickListener listener) {
             super(itemView);
-            view = itemView;
-            post_card_view = itemView.findViewById(R.id.post_card_view);
+
             customerName = itemView.findViewById(R.id.txtCustomerName);
             EmployeeName = itemView.findViewById(R.id.txtEmployeeName);
-            type = itemView.findViewById(R.id.txttype);
-            followup = itemView.findViewById(R.id.txtfollowup);
-
+            sch_type = itemView.findViewById(R.id.txtsch_type);
+            sch_date = itemView.findViewById(R.id.txtsch_date);
+            sch_status = itemView.findViewById(R.id.txtStatus);
+            followup_date = itemView.findViewById(R.id.txtFollowupDate);
 
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -114,12 +107,12 @@ public class StatusReviewAdapter extends RecyclerView.Adapter<StatusReviewAdapte
 
                 }
             });
-            followup.setOnClickListener(new View.OnClickListener() {
+            sch_type.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if (listener!=null){
-                        int position =getAdapterPosition();
-                        if (position!=RecyclerView.NO_POSITION){
+                    if (listener != null) {
+                        int position = getAdapterPosition();
+                        if (position != RecyclerView.NO_POSITION) {
                             listener.TypeClick(getitem(position), position);
                         }
                     }
