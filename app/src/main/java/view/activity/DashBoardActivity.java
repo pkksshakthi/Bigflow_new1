@@ -84,6 +84,7 @@ public class DashBoardActivity extends AppCompatActivity {
     private DrawerLayout drawer;
     private Toolbar toolbar;
     private PendingIntent pendingIntent;
+    private AlarmManager manager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -96,16 +97,16 @@ public class DashBoardActivity extends AppCompatActivity {
         //update this in dashboardactivity below oncreate method
         try {
             int interval = 3000;
-            AlarmManager manager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+            manager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
             Intent alarmIntent = new Intent(DashBoardActivity.this, ConnectivityReceiver.class);
             alarmIntent.setAction("restarting.services");
             pendingIntent = PendingIntent.getBroadcast(DashBoardActivity.this, 0, alarmIntent, 0);
-
             manager.setRepeating(AlarmManager.RTC_WAKEUP, SystemClock.elapsedRealtime(), 1000 * 60 * 2, pendingIntent);
-
             manager.setInexactRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), interval, pendingIntent);
 
         } catch (Exception e) {
+
+            
         }
         connectivityReceiver.setConnectivityReceiver(new ConnectivityReceiver.ConnectivityReceiverListener() {
             @Override
@@ -309,6 +310,7 @@ public class DashBoardActivity extends AppCompatActivity {
             setFragment(new AboutFragment(), true);
         } else if (id == R.id.action_logout) {
             session.logoutUser();
+            manager.cancel(pendingIntent);
             startActivity(new Intent(getApplicationContext(), LoginActivity.class));
             finish();
         }
