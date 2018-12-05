@@ -3,6 +3,7 @@ package view.activity;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -15,6 +16,10 @@ import android.widget.Spinner;
 import android.widget.SpinnerAdapter;
 import android.widget.TextView;
 
+import com.chootdev.csnackbar.Align;
+import com.chootdev.csnackbar.Duration;
+import com.chootdev.csnackbar.Snackbar;
+import com.chootdev.csnackbar.Type;
 import com.vsolv.bigflow.R;
 
 import java.util.ArrayList;
@@ -22,6 +27,8 @@ import java.util.Calendar;
 import java.util.List;
 
 import DataBase.GetData;
+import constant.Constant;
+import models.Common;
 import models.CustomSpinnerAdapter;
 import models.UserDetails;
 import models.Variables;
@@ -34,20 +41,26 @@ public class FilterStatusReview extends AppCompatActivity implements View.OnClic
     Bundle searchDetail;
     private TextView fDate, tDate, followup_fDate, followup_tDate, reschedule_fDate, reschedule_tDate;
     private Button btnApply, btnClear;
-    private int employee_gid;
     DatePickerDialog.OnDateSetListener datePickerListener;
     private Calendar currentDate;
     private GetData getdata;
     private List<Variables.Employee> employeeList;
-    private ArrayList<Variables.Details> employeeDetailList;
+    private List<Variables.ScheduleType> scheduleTypeList;
+    private ArrayList<Variables.Details> employeeDetailList, scheduleDetailList;
+    private ProgressDialog progressDialog;
+    private CustomSpinnerAdapter spinnerAdapter;
+    private Bundle bundle;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_filter_status_review);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        bundle = new Bundle();
         if (getIntent() != null) {
-            Bundle bundle = getIntent().getExtras();
-            employee_gid = bundle.getInt("employee_gid", 0);
+
+            bundle = getIntent().getExtras();
+
         }
         loadView();
         initializeView();
@@ -75,7 +88,12 @@ public class FilterStatusReview extends AppCompatActivity implements View.OnClic
         searchDetail = new Bundle();
         currentDate = Calendar.getInstance();
         categories = new ArrayList<>();
+        employeeList = new ArrayList<>();
+        scheduleTypeList = new ArrayList<>();
         getdata = new GetData(getApplicationContext());
+        progressDialog = new ProgressDialog(this);
+        progressDialog.setTitle(getResources().getString(R.string.loading));
+        progressDialog.setCancelable(false);
         ddlEmployee.setOnItemSelectedListener(this);
         ddlApproveStatus.setOnItemSelectedListener(this);
         ddlScheduleType.setOnItemSelectedListener(this);
@@ -96,59 +114,96 @@ public class FilterStatusReview extends AppCompatActivity implements View.OnClic
 
 
     private void loadData() {
-        categories.add("Automobile");
-        categories.add("Business Services");
-        categories.add("Computers");
-        categories.add("Education");
-        categories.add("Personal");
-        categories.add("Travel");
+        if (!Common.isOnline(getApplicationContext())) {
+            Snackbar.with(getApplicationContext(), null)
+                    .type(Type.WARNING)
+                    .message(getApplicationContext().getResources().getString(R.string.check_internet_connection))
+                    .duration(Duration.SHORT)
+                    .fillParent(true)
+                    .textAlign(Align.LEFT)
+                    .show();
+            return;
+        }
+        progressDialog.show();
 
-        final ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, categories);
-        dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        categories.add(Constant.status_review_pending);
+        categories.add(Constant.status_review_approved);
+        categories.add(Constant.status_review_reject);
 
 
+        fDate.setText(bundle.getString(Constant.key_fdate, getResources().getString(R.string.choose_date)));
+        tDate.setText(bundle.getString(Constant.key_fdate, getResources().getString(R.string.choose_date))
+        );
+        final ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(this, R.layout.spinner_item, categories);
+        dataAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         ddlApproveStatus.setAdapter(dataAdapter);
+        ddlApproveStatus.setSelection(dataAdapter.getPosition(bundle.getString(Constant.key_sch_review_status, Constant.status_review_pending)));
+
         employeeList = getdata.EmployeeList(UserDetails.getUser_id(), new NetworkResult() {
             @Override
             public void handlerResult(String result) {
                 employeeDetailList = new ArrayList<>();
+                Variables.Details details = new Variables.Details();
+                details.data = getResources().getString(R.string.choose);
+                details.gid = 0;
+                employeeDetailList.add(details);
                 for (int i = 0; employeeList.size() > i; i++) {
-                    Variables.Details details = new Variables.Details();
+                    details = new Variables.Details();
                     details.data = employeeList.get(i).employee_name;
                     details.gid = employeeList.get(i).employee_gid;
                     employeeDetailList.add(details);
                 }
-                setAdapter(dataAdapter);
+                spinnerAdapter = new CustomSpinnerAdapter(getApplicationContext(), R.layout.list_item, employeeDetailList);
+                ddlEmployee.setAdapter(spinnerAdapter);
+                ddlEmployee.setSelection(spinnerAdapter.getPosition(bundle.getInt(Constant.key_employee_gid, 0)));
+                getScheduleType();
             }
 
             @Override
             public void handlerError(String result) {
-
+                progressDialog.cancel();
             }
         });
 
 
-       /* List<Variables.Details> detailsList = new ArrayList<>();
-        for (int i = 0; 5 > i; i++) {
-            Variables.Details details = new Variables.Details();
-            details.data = "ponraj" + i;
-            details.gid = i;
-            detailsList.add(details);
-        }*/
+    }
 
+    private void getScheduleType() {
+        scheduleTypeList = getdata.scheduleTypeList(new NetworkResult() {
+            @Override
+            public void handlerResult(String result) {
+                scheduleDetailList = new ArrayList<>();
+                Variables.Details details = new Variables.Details();
+                details.data = getResources().getString(R.string.choose);
+                details.gid = 0;
+                scheduleDetailList.add(details);
+                for (int i = 0; scheduleTypeList.size() > i; i++) {
+                    details = new Variables.Details();
+                    details.data = scheduleTypeList.get(i).schedule_type_name;
+                    details.gid = scheduleTypeList.get(i).schedule_type_id;
+                    scheduleDetailList.add(details);
+                }
+                spinnerAdapter = new CustomSpinnerAdapter(getApplicationContext(), R.layout.list_item, scheduleDetailList);
+                ddlScheduleType.setAdapter(spinnerAdapter);
+                ddlScheduleType.setSelection(spinnerAdapter.getPosition(bundle.getInt(Constant.key_sch_type_gid, 0)));
+                progressDialog.cancel();
+            }
 
+            @Override
+            public void handlerError(String result) {
+                progressDialog.cancel();
+            }
+        });
     }
 
     private void setAdapter(ArrayAdapter<String> dataAdapter) {
-        CustomSpinnerAdapter spinnerAdapter = new CustomSpinnerAdapter(getApplicationContext(), R.layout.list_item, employeeDetailList);
 
-        ddlEmployee.setAdapter(spinnerAdapter);
-        ddlEmployee.setSelection(spinnerAdapter.getPosition(2));
+
         //ddlEmployee.setSelection(employee_gid);
-        ddlScheduleType.setAdapter(dataAdapter);
-        ddlCustGroup.setAdapter(dataAdapter);
-        ddlCustName.setAdapter(dataAdapter);
-        ddlCustLocation.setAdapter(dataAdapter);
+
+//        ddlCustGroup.setAdapter(dataAdapter);
+//        ddlCustName.setAdapter(dataAdapter);
+//        ddlCustLocation.setAdapter(dataAdapter);
     }
 
     @Override
@@ -170,33 +225,54 @@ public class FilterStatusReview extends AppCompatActivity implements View.OnClic
         switch (v.getId()) {
 
             case R.id.txtSRFDate:
+                if (!fDate.getText().toString().equals(getResources().getString(R.string.choose_date))) {
+                    Variables.calendarDate cal = new Variables.calendarDate(fDate.getText().toString());
+                    datePickerDialog = new DatePickerDialog(this, datePickerListener, cal.getYear(), cal.getMonth(), cal.getDayofmonth());
+                }
                 datePickerDialog.getDatePicker().setTag(R.id.txtSRFDate);
                 datePickerDialog.show();
                 break;
             case R.id.txtSRTDate:
+                if (!tDate.getText().toString().equals(getResources().getString(R.string.choose_date))) {
+                    Variables.calendarDate cal = new Variables.calendarDate(tDate.getText().toString());
+                    datePickerDialog = new DatePickerDialog(this, datePickerListener, cal.getYear(), cal.getMonth(), cal.getDayofmonth());
+                }
                 datePickerDialog.getDatePicker().setTag(R.id.txtSRTDate);
                 datePickerDialog.show();
                 break;
             case R.id.txtSRFollowupFDate:
+                if (!followup_fDate.getText().toString().equals(getResources().getString(R.string.choose_date))) {
+                    Variables.calendarDate cal = new Variables.calendarDate(followup_fDate.getText().toString());
+                    datePickerDialog = new DatePickerDialog(this, datePickerListener, cal.getYear(), cal.getMonth(), cal.getDayofmonth());
+                }
                 datePickerDialog.getDatePicker().setTag(R.id.txtSRFollowupFDate);
                 datePickerDialog.show();
                 break;
             case R.id.txtSRFollowupTDate:
+                if (!followup_tDate.getText().toString().equals(getResources().getString(R.string.choose_date))) {
+                    Variables.calendarDate cal = new Variables.calendarDate(followup_tDate.getText().toString());
+                    datePickerDialog = new DatePickerDialog(this, datePickerListener, cal.getYear(), cal.getMonth(), cal.getDayofmonth());
+                }
                 datePickerDialog.getDatePicker().setTag(R.id.txtSRFollowupTDate);
                 datePickerDialog.show();
                 break;
             case R.id.txtSRRescheduleFDate:
+                if (!reschedule_fDate.getText().toString().equals(getResources().getString(R.string.choose_date))) {
+                    Variables.calendarDate cal = new Variables.calendarDate(reschedule_fDate.getText().toString());
+                    datePickerDialog = new DatePickerDialog(this, datePickerListener, cal.getYear(), cal.getMonth(), cal.getDayofmonth());
+                }
                 datePickerDialog.getDatePicker().setTag(R.id.txtSRRescheduleFDate);
                 datePickerDialog.show();
                 break;
-            case R.id.ddlSREmployee:
+            case R.id.txtSRRescheduleTDate:
+                if (!reschedule_tDate.getText().toString().equals(getResources().getString(R.string.choose_date))) {
+                    Variables.calendarDate cal = new Variables.calendarDate(reschedule_tDate.getText().toString());
+                    datePickerDialog = new DatePickerDialog(this, datePickerListener, cal.getYear(), cal.getMonth(), cal.getDayofmonth());
+                }
                 datePickerDialog.getDatePicker().setTag(R.id.txtSRRescheduleTDate);
                 datePickerDialog.show();
                 break;
-            case R.id.ddlSRType:
-                datePickerDialog.getDatePicker().setTag(R.id.txtSRRescheduleTDate);
-                datePickerDialog.show();
-                break;
+
             case R.id.btnSRApply:
                 setSearchData();
                 break;
@@ -206,6 +282,7 @@ public class FilterStatusReview extends AppCompatActivity implements View.OnClic
         }
     }
 
+
     private void clearSearchData() {
         searchDetail = new Bundle();
         ddlEmployee.setSelection(0);
@@ -213,31 +290,33 @@ public class FilterStatusReview extends AppCompatActivity implements View.OnClic
         ddlCustGroup.setSelection(0);
         ddlCustName.setSelection(0);
         ddlCustLocation.setSelection(0);
-        String from_date = getResources().getString(R.string.from_date);
-        String to_date = getResources().getString(R.string.to_date);
-        fDate.setText(from_date);
-        tDate.setText(to_date);
-        followup_fDate.setText(from_date);
-        followup_tDate.setText(to_date);
-        reschedule_fDate.setText(from_date);
-        reschedule_tDate.setText(to_date);
+        String chooseDate = getResources().getString(R.string.choose_date);
+        fDate.setText(chooseDate);
+        tDate.setText(chooseDate);
+        followup_fDate.setText(chooseDate);
+        followup_tDate.setText(chooseDate);
+        reschedule_fDate.setText(chooseDate);
+        reschedule_tDate.setText(chooseDate);
     }
 
     private void setSearchData() {
-        String a = ddlEmployee.getSelectedItem().toString();
-        searchDetail.putString("employee_gid", "");
-        searchDetail.putString("scheduletype_gid", fDate.getText().toString());
-        searchDetail.putString("approve_status", ddlApproveStatus.getSelectedItem().toString());
-        searchDetail.putString("customer_group_gid", fDate.getText().toString());
-        searchDetail.putString("customer_gid", fDate.getText().toString());
-        searchDetail.putString("customer_location_gid", fDate.getText().toString());
+        Variables.Details employee = (Variables.Details) ddlEmployee.getSelectedItem();
+        searchDetail = new Bundle();
+        searchDetail.putInt(Constant.key_employee_gid, employee.gid);
+        searchDetail.putString(Constant.key_employee_name, employee.data);
+        searchDetail.putInt(Constant.key_customer_gid, 0);
+        searchDetail.putString(Constant.key_sch_review_status, ddlApproveStatus.getSelectedItem().toString());
+        searchDetail.putInt(Constant.key_cust_group_gid, 0);
+        searchDetail.putInt(Constant.key_loaction_gid, 0);
+        Variables.Details type = (Variables.Details) ddlScheduleType.getSelectedItem();
+        searchDetail.putInt(Constant.key_sch_type_gid, type.gid);
 
-        searchDetail.putString("fDate", fDate.getText().toString());
-        searchDetail.putString("tDate", tDate.getText().toString());
-        searchDetail.putString("f_fDate", followup_fDate.getText().toString());
-        searchDetail.putString("f_tDate", followup_tDate.getText().toString());
-        searchDetail.putString("r_fDate", reschedule_fDate.getText().toString());
-        searchDetail.putString("r_tDate", reschedule_tDate.getText().toString());
+        searchDetail.putString(Constant.key_fdate, fDate.getText().toString());
+        searchDetail.putString(Constant.key_tdate, tDate.getText().toString());
+        searchDetail.putString(Constant.key_followup_fdate, followup_fDate.getText().toString());
+        searchDetail.putString(Constant.getKey_followup_tdate, followup_tDate.getText().toString());
+        searchDetail.putString(Constant.key_reschedule_fdate, reschedule_fDate.getText().toString());
+        searchDetail.putString(Constant.key_reschedule_tdate, reschedule_tDate.getText().toString());
 
         Intent returnIntent = new Intent();
         returnIntent.putExtras(searchDetail);
@@ -255,17 +334,17 @@ public class FilterStatusReview extends AppCompatActivity implements View.OnClic
                 int tag = ((Integer) view.getTag());
 
                 if (tag == R.id.txtSRFDate) {
-                    fDate.setText(dayOfMonth + "/" + monthOfYear + "/" + year);
+                    fDate.setText(dayOfMonth + "/" + (monthOfYear + 1) + "/" + year);
                 } else if (tag == R.id.txtSRTDate) {
-                    tDate.setText(dayOfMonth + "/" + monthOfYear + "/" + year);
+                    tDate.setText(dayOfMonth + "/" + (monthOfYear + 1) + "/" + year);
                 } else if (tag == R.id.txtSRFollowupFDate) {
-                    followup_fDate.setText(dayOfMonth + "/" + monthOfYear + "/" + year);
+                    followup_fDate.setText(dayOfMonth + "/" + (monthOfYear + 1) + "/" + year);
                 } else if (tag == R.id.txtSRFollowupTDate) {
-                    followup_tDate.setText(dayOfMonth + "/" + monthOfYear + "/" + year);
+                    followup_tDate.setText(dayOfMonth + "/" + (monthOfYear + 1) + "/" + year);
                 } else if (tag == R.id.txtSRRescheduleFDate) {
-                    reschedule_fDate.setText(dayOfMonth + "/" + monthOfYear + "/" + year);
+                    reschedule_fDate.setText(dayOfMonth + "/" + (monthOfYear + 1) + "/" + year);
                 } else if (tag == R.id.txtSRRescheduleTDate) {
-                    reschedule_tDate.setText(dayOfMonth + "/" + monthOfYear + "/" + year);
+                    reschedule_tDate.setText(dayOfMonth + "/" + (monthOfYear + 1) + "/" + year);
                 }
             }
 
@@ -280,5 +359,11 @@ public class FilterStatusReview extends AppCompatActivity implements View.OnClic
         finish();
         super.onBackPressed();
 
+    }
+
+    @Override
+    public boolean onSupportNavigateUp() {
+        onBackPressed();
+        return super.onSupportNavigateUp();
     }
 }

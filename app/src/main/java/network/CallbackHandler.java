@@ -15,7 +15,6 @@ import com.android.volley.ServerError;
 import com.android.volley.TimeoutError;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.HttpStack;
-import com.android.volley.toolbox.HurlStack;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 
@@ -65,7 +64,7 @@ public class CallbackHandler {
         return mInstance;
     }
 
-    public static RequestQueue sendReqest(Context context, int method, final String requestBody, String URL, final VolleyCallback success) {
+    public static RequestQueue sendReqest(Context context, int method, final String requestBody, String URL, final VolleyCallback success) throws IllegalStateException {
 
         mContext = context;
 
@@ -131,9 +130,10 @@ public class CallbackHandler {
         CallbackHandler.getInstance(mContext).addToRequestQueue(mStringRequest);
         return mRequestQueue;
     }
+
     private static HttpStack httpsSSLcheck() {
         try {
-            TrustManager[] trustAllCerts = new TrustManager[] {
+            TrustManager[] trustAllCerts = new TrustManager[]{
                     new X509TrustManager() {
                         public X509Certificate[] getAcceptedIssuers() {
                             X509Certificate[] myTrustedAnchors = new X509Certificate[0];
@@ -141,10 +141,12 @@ public class CallbackHandler {
                         }
 
                         @Override
-                        public void checkClientTrusted(X509Certificate[] certs, String authType) {}
+                        public void checkClientTrusted(X509Certificate[] certs, String authType) {
+                        }
 
                         @Override
-                        public void checkServerTrusted(X509Certificate[] certs, String authType) {}
+                        public void checkServerTrusted(X509Certificate[] certs, String authType) {
+                        }
                     }
             };
 
@@ -154,7 +156,13 @@ public class CallbackHandler {
             HttpsURLConnection.setDefaultHostnameVerifier(new HostnameVerifier() {
                 @Override
                 public boolean verify(String arg0, SSLSession arg1) {
-                    return true;
+                    if (arg0.equalsIgnoreCase("www.vsolvengineering.com") ||
+                            arg0.equalsIgnoreCase("174.138.120.196")) {
+                        return true;
+                    } else {
+                        return false;
+                    }
+
                 }
             });
         } catch (Exception e) {

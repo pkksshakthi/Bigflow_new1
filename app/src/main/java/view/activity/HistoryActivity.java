@@ -81,7 +81,7 @@ public class HistoryActivity extends AppCompatActivity {
             progressDialog.cancel();
             return;
         }
-        historyList = getData.HistoryList(customer_gid, 21, new NetworkResult() {
+        historyList = getData.HistoryList(customer_gid, UserDetails.getUser_id(), new NetworkResult() {
             @Override
             public void handlerResult(String result) {
                 setAdapter();

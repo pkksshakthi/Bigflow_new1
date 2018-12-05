@@ -43,8 +43,8 @@ public class ApprovalAdapter extends RecyclerView.Adapter<ApprovalAdapter.Custom
 
         final Variables.Approval_List customer = StausList.get(position);
 
-        holder.customerName.setText(customer.getCustomername());
-        holder.EmployeeName.setText(customer.getEmployeename());
+        holder.customerName.setText(customer.getCustomername().toUpperCase());
+        holder.EmployeeName.setText(customer.getEmployeename().toUpperCase());
         holder.ViewSale.setText("View Sales");
 
     }

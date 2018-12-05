@@ -23,54 +23,27 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="3dp">
 
-                <Spinner
-                    android:id="@+id/ddlSREmployee"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:spinnerMode="dialog"
-                    android:theme="@style/ButtonTheme" />
-            </android.support.v7.widget.CardView>
-
-            <android.support.v7.widget.CardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="3dp">
-
-                <Spinner
-                    android:id="@+id/ddlSRApproveStatus"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:padding="5dp"
-                    android:spinnerMode="dialog"
-                    android:theme="@style/ButtonTheme" />
-            </android.support.v7.widget.CardView>
-
-            <android.support.v7.widget.CardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="3dp">
-
-                <Spinner
-                    android:id="@+id/ddlSRType"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:padding="5dp"
-                    android:spinnerMode="dialog"
-                    android:theme="@style/ButtonTheme" />
-            </android.support.v7.widget.CardView>
-
-            <android.support.v7.widget.CardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="3dp">
-
-                <TextView
-                    android:id="@+id/txtSRFDate"
-                    style="@style/PrimaryText"
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:drawableRight="@drawable/ic_action_date"
-                    android:text="From Date" />
+                    android:orientation="horizontal">
+
+                    <TextView
+                        style="@style/SecondaryText"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="0.5"
+                        android:gravity="center|left"
+                        android:text="Employee" />
+
+                    <Spinner
+                        android:id="@+id/ddlSREmployee"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:spinnerMode="dialog"
+                        android:theme="@style/ButtonTheme" />
+                </LinearLayout>
             </android.support.v7.widget.CardView>
 
             <android.support.v7.widget.CardView
@@ -78,25 +51,126 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="3dp">
 
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        style="@style/SecondaryText"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="0.5"
+                        android:gravity="center|left"
+                        android:text="Status" />
+
+                    <Spinner
+                        android:id="@+id/ddlSRApproveStatus"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:spinnerMode="dialog"
+                        android:theme="@style/ButtonTheme" />
+                </LinearLayout>
+
+            </android.support.v7.widget.CardView>
+
+            <android.support.v7.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="3dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        style="@style/SecondaryText"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="0.5"
+                        android:gravity="center|left"
+                        android:text="Type" />
+
+                    <Spinner
+                        android:id="@+id/ddlSRType"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:spinnerMode="dialog"
+                        android:theme="@style/ButtonTheme" />
+                </LinearLayout>
+            </android.support.v7.widget.CardView>
+
+            <android.support.v7.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="3dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        style="@style/SecondaryText"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="0.5"
+                        android:gravity="center|left"
+                        android:text="From Date" />
+
+                    <TextView
+                        android:id="@+id/txtSRFDate"
+                        style="@style/SecondaryTextHilight"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:drawableRight="@drawable/ic_action_date"
+                        android:text="@string/choose_date" />
+                </LinearLayout>
+            </android.support.v7.widget.CardView>
+
+            <android.support.v7.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="3dp">
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                <TextView
+                    style="@style/SecondaryText"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="0.5"
+                    android:gravity="center|left"
+                    android:text="To Date" />
                 <TextView
                     android:id="@+id/txtSRTDate"
-                    style="@style/PrimaryText"
-                    android:layout_width="match_parent"
+                    style="@style/SecondaryTextHilight"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
+                    android:layout_weight="1"
                     android:drawableRight="@drawable/ic_action_date"
-                    android:text="To Date" />
+                    android:text="@string/choose_date" />
+                </LinearLayout>
             </android.support.v7.widget.CardView>
 
             <TextView
                 style="@style/SecondaryText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Customer" />
+                android:text="Customer"
+                android:visibility="gone" />
 
             <android.support.v7.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="3dp">
+                android:layout_marginBottom="3dp"
+                android:visibility="gone">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -145,12 +219,14 @@
                 style="@style/SecondaryText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Follow Up" />
+                android:text="Follow Up"
+                android:visibility="gone" />
 
             <android.support.v7.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="3dp">
+                android:layout_marginBottom="3dp"
+                android:visibility="gone">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -184,12 +260,14 @@
                 style="@style/SecondaryText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Reschedule" />
+                android:text="Reschedule"
+                android:visibility="gone" />
 
             <android.support.v7.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="3dp">
+                android:layout_marginBottom="3dp"
+                android:visibility="gone">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -202,7 +280,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:drawableRight="@drawable/ic_action_date"
-                        android:text="From Date" />
+                        android:text="@string/choose_date" />
 
                     <TextView
                         style="@style/VerticalLine"
@@ -215,7 +293,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:drawableRight="@drawable/ic_action_date"
-                        android:text="To Date" />
+                        android:text="@string/choose_date" />
                 </LinearLayout>
             </android.support.v7.widget.CardView>
         </LinearLayout>

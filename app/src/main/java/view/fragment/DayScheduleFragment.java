@@ -1,20 +1,31 @@
 package view.fragment;
 
-import android.app.AlertDialog;
+import android.app.DatePickerDialog;
+import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.DatePicker;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.SearchView;
@@ -28,11 +39,14 @@ import com.chootdev.csnackbar.Type;
 import com.vsolv.bigflow.R;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
 import DataBase.GetData;
+import constant.Constant;
 import models.Common;
+import models.CustomDialogListener;
 import models.CustomerAdapter;
 import models.ListAdapter;
 import models.ScheduleForAdapter;
@@ -42,6 +56,7 @@ import presenter.NetworkResult;
 import view.activity.CollectionActivity;
 import view.activity.CommentActivity;
 import view.activity.CustomerDetailActivity;
+import view.activity.DashBoardActivity;
 import view.activity.HistoryActivity;
 import view.activity.MapsActivity;
 import view.activity.SalesActivity;
@@ -75,10 +90,17 @@ public class DayScheduleFragment extends Fragment {
     private ListView listView;
     private List<Object> scheduleTypeList;
     private AlertDialog alertDialog;
-
+    private FloatingActionButton fabNext;
+    private FloatingActionButton fabPrevious;
+    private Date selectedDate;
+    private List<Variables.Customer> selectionList;
+    private List<Integer> cust_gid;
+    private DatePickerDialog.OnDateSetListener datePickerListener;
+    private TextView resch_date;
 
     public DayScheduleFragment() {
         // Required empty public constructor
+        setHasOptionsMenu(true);
     }
 
     /**
@@ -112,8 +134,33 @@ public class DayScheduleFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        getActivity().setTitle("Today Schedule");
+        getActivity().setTitle(Constant.title_day_schedule);
+        setHasOptionsMenu(true);
         fragmentView = inflater.inflate(R.layout.fragment_day_schedule, container, false);
+        fragmentView.setFocusableInTouchMode(true);
+        fragmentView.requestFocus();
+        fragmentView.setOnKeyListener(new View.OnKeyListener() {
+            @Override
+            public boolean onKey(View v, int keyCode, KeyEvent event) {
+                if (keyCode == KeyEvent.KEYCODE_BACK) {
+                    if (adapter.getAction()) {
+                        fabNext.show();
+                        Integer a = new Date().compareTo(selectedDate);
+                        if (a < 0)
+                            fabPrevious.show();
+                        Toolbar toolbar = ((DashBoardActivity) getActivity()).findViewById(R.id.toolbar);
+                        toolbar.getMenu().clear();
+                        toolbar.inflateMenu(R.menu.dash_board);
+                        adapter.setAction(false);
+                        adapter.notifyDataSetChanged();
+                        return true;
+                    } else {
+                        return false;
+                    }
+                }
+                return false;
+            }
+        });
         loadView();
         initializeView();
         loadData();
@@ -126,6 +173,8 @@ public class DayScheduleFragment extends Fragment {
         empty_view = fragmentView.findViewById(R.id.empty_view);
         customerSearch = fragmentView.findViewById(R.id.customer_search);
         reload = fragmentView.findViewById(R.id.custReload);
+        fabNext = fragmentView.findViewById(R.id.fabNext);
+        fabPrevious = fragmentView.findViewById(R.id.fabPrevious);
     }
 
     private void initializeView() {
@@ -134,11 +183,13 @@ public class DayScheduleFragment extends Fragment {
         recyclerView.setLayoutManager(new LinearLayoutManager(this.getActivity()));
         customerList = new ArrayList<>();
         customerSearch.setQueryHint("Search");
-        //reload.setOnClickListener();
+        selectedDate = new Date();
+        fabPrevious.hide();
         progressDialog = new ProgressDialog(getContext());
         progressDialog.setTitle(getResources().getString(R.string.loading));
         progressDialog.setCancelable(false);
 
+        datePickerListener = setDatepicker();
         getData = new GetData(getActivity());
         customerSearch.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
@@ -151,6 +202,40 @@ public class DayScheduleFragment extends Fragment {
             public boolean onQueryTextChange(String newText) {
                 filter(newText);
                 return true;
+            }
+        });
+        fabNext.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                Date currentdate = new Date();
+                Calendar c = Calendar.getInstance();
+                c.setTime(selectedDate);
+                c.add(Calendar.DATE, 1);
+                Date temp = c.getTime();
+                Integer a = currentdate.compareTo(temp);
+                if (a < 0)
+                    fabPrevious.show();
+                selectedDate = temp;
+                getActivity().setTitle(Constant.title_day_schedule + "(" + Common.convertDateString(selectedDate, Constant.date_display_format) + ")");
+                loadData();
+                //Toast.makeText(getActivity(), "hello", Toast.LENGTH_LONG).show();
+            }
+        });
+        fabPrevious.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Date currentdate = new Date();
+                Calendar c = Calendar.getInstance();
+                c.setTime(selectedDate);
+                c.add(Calendar.DATE, -1);
+                Date temp = c.getTime();
+                Integer a = currentdate.compareTo(temp);
+                if (a == 1)
+                    fabPrevious.hide();
+                selectedDate = temp;
+                getActivity().setTitle(Constant.title_day_schedule + "(" + Common.convertDateString(selectedDate, Constant.date_display_format) + ")");
+                loadData();
             }
         });
         reload.setOnClickListener(new View.OnClickListener() {
@@ -176,7 +261,7 @@ public class DayScheduleFragment extends Fragment {
             return;
         }
 
-        customerList = getData.ScheduledCustomerList(UserDetails.getUser_id(), Common.convertDateString(new Date(), "yyyy-MM-dd"), new NetworkResult() {
+        customerList = getData.ScheduledCustomerList(UserDetails.getUser_id(), Common.convertDateString(selectedDate, "yyyy-MM-dd"), new NetworkResult() {
             @Override
             public void handlerResult(String result) {
                 setAdapter();
@@ -199,18 +284,48 @@ public class DayScheduleFragment extends Fragment {
 
         adapter.setOnclickListener(new CustomerAdapter.OnItemClickListener() {
             @Override
-            public void onItemClick(Variables.Customer item, int position) {
+            public void onItemClick(View view, Variables.Customer item, int position) {
+                if (adapter.getAction()) {
+                    int index = selectionList.indexOf(item);
+                    TextView cust_name = (TextView) view.findViewById(R.id.txtCustomerName);
+                    if (index < 0) {
+                        selectionList.add(item);
+                        cust_name.setCompoundDrawablesWithIntrinsicBounds(null, null, getActivity().getResources().getDrawable(R.drawable.ic_action_check), null);
+                    } else {
+                        selectionList.remove(item);
+                        cust_name.setCompoundDrawablesWithIntrinsicBounds(null, null, null, null);
+                    }
 
-                getScheduleType(item.customer_gid);
+                } else {
+                    Date currentdate = new Date();
+                    Integer a = currentdate.compareTo(selectedDate);
+                    if (a == 1) {
+                        getScheduleType(item.customer_gid);
+                    } else {
+                        Toast.makeText(getContext(), "You Can't edit this date.!", Toast.LENGTH_LONG).show();
+                    }
+                }
+
 
             }
 
             @Override
-            public void onItemLongClick(Variables.Customer item, int position) {
-                Intent intent = new Intent(getActivity(), CustomerDetailActivity.class);
-                intent.putExtra("customer_gid", item.customer_gid);
-                intent.putExtra("customer_name", item.customer_name);
-                startActivity(intent);
+            public void onItemLongClick(View view, Variables.Customer item, int position) {
+                if (!adapter.getAction()) {
+                    adapter.setAction(true);
+                    fabNext.hide();
+                    fabPrevious.hide();
+                    Toolbar toolbar = ((DashBoardActivity) getActivity()).findViewById(R.id.toolbar);
+                    toolbar.getMenu().clear();
+                    toolbar.inflateMenu(R.menu.day_schedule);
+                    selectionList = new ArrayList<>();
+                    selectionList.add(item);
+                    adapter.notifyDataSetChanged();
+                    TextView cust_name = (TextView) view.findViewById(R.id.txtCustomerName);
+                    cust_name.setCompoundDrawablesWithIntrinsicBounds(null, null, getActivity().getResources().getDrawable(R.drawable.ic_action_check), null);
+                } else {
+                    selectionList.add(item);
+                }
             }
 
             @Override
@@ -253,7 +368,7 @@ public class DayScheduleFragment extends Fragment {
             @Override
             public void handlerResult(String result) {
                 sessiondata = new Bundle();
-                sessiondata.putInt("customer_id", customer_gid);
+                sessiondata.putInt(Constant.key_customer_gid, customer_gid);
                 createDialog();
                 progressDialog.cancel();
             }
@@ -279,8 +394,8 @@ public class DayScheduleFragment extends Fragment {
                 if (scheduleTypeList.get(position) instanceof Variables.ScheduleType) {
 
                     Variables.ScheduleType scheduleType = (Variables.ScheduleType) scheduleTypeList.get(position);
-                    sessiondata.putInt("schedule_gid", scheduleType.schedule_gid);
-                    sessiondata.putInt("scheduletype_id", scheduleType.schedule_type_id);
+                    sessiondata.putInt(Constant.key_schedule_gid, scheduleType.schedule_gid);
+                    sessiondata.putInt(Constant.key_sch_type_gid, scheduleType.schedule_type_id);
                     switch (scheduleType.schedule_type_name) {
                         case "BOOKING":
                             gotoSales(scheduleType);
@@ -328,8 +443,6 @@ public class DayScheduleFragment extends Fragment {
             Variables.Details details = new Variables.Details();
             details.data = "New Sales";
             details.gid = 0;
-            details.Schedule_gid = 0;
-            details.Salestatus = "";
             details.dataColor = getActivity().getResources().getColor(R.color.colorAccent);
             detailsList.add(detailsList.size(), details);
             alertDialog.cancel();
@@ -350,12 +463,9 @@ public class DayScheduleFragment extends Fragment {
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                     Variables.Details details_toactivity = (Variables.Details) listAdapter.getItem(position);
-                    sessiondata.putInt("soheader_no", details_toactivity.gid);
-                    sessiondata.putInt("Sale_Schedule_gid", details_toactivity.Schedule_gid);
-                    sessiondata.putString("Status", details_toactivity.Salestatus);
-                    //sessiondata.putLong("sales_gid", listAdapter.getItemId(position));
+                    sessiondata.putInt(Constant.key_soheader_gid, details_toactivity.gid);
                     salesDialog.cancel();
-                    if (details_toactivity.Salestatus != "CANCELLED") {
+                    if (details_toactivity.status != "CANCELLED") {
                         gotoActivity(SalesActivity.class);
                     }
                 }
@@ -410,12 +520,7 @@ public class DayScheduleFragment extends Fragment {
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-//        if (context instanceof OnFragmentInteractionListener) {
-//            mListener = (OnFragmentInteractionListener) context;
-//        } else {
-//            throw new RuntimeException(context.toString()
-//                    + " must implement OnFragmentInteractionListener");
-//        }
+
     }
 
     @Override
@@ -424,18 +529,122 @@ public class DayScheduleFragment extends Fragment {
         mListener = null;
     }
 
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
-     */
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
         void onFragmentInteraction(Uri uri);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.DSDelete) {
+
+            if (selectionList.size() > 0) {
+                cust_gid = new ArrayList<>();
+                for (int i = 0; i < selectionList.size(); i++) {
+                    cust_gid.add(selectionList.get(i).customer_gid);
+                }
+                createRescheduleDialog();
+            } else {
+                Toast.makeText(getActivity(), "Select any one.!", Toast.LENGTH_LONG).show();
+            }
+
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    private void createRescheduleDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        builder.setTitle("Reschedule");
+        View customView = LayoutInflater.from(getActivity()).inflate(R.layout.alert_reschedule, null, false);
+        resch_date = customView.findViewById(R.id.txtRSDate);
+        resch_date.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (getActivity().getResources().getString(R.string.choose_date).equals(resch_date.getText().toString()))
+                    resch_date.setText(Common.convertDateString(new Date(), Constant.date_display_format));
+                Variables.calendarDate cal = new Variables.calendarDate(resch_date.getText().toString());
+                DatePickerDialog datePickerDialog = new DatePickerDialog(getActivity(), datePickerListener, cal.getYear(), cal.getMonth(), cal.getDayofmonth());
+                datePickerDialog.getDatePicker().setTag(R.id.txtASFFDate);
+                datePickerDialog.show();
+            }
+        });
+        builder.setView(customView);
+        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+
+            }
+        });
+        builder.setNegativeButton("Cancle", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+            }
+        });
+        alertDialog = builder.create();
+        alertDialog.show();
+        CustomDialogListener dialogListener = new CustomDialogListener(alertDialog);
+        dialogListener.setClickListener(new presenter.CustomDialogListener() {
+            @Override
+            public void OnClickPositive(View view, AlertDialog dialog) {
+                EditText remark = dialog.findViewById(R.id.etxRSRemark);
+                if (remark.getText().toString().trim().length() == 0) {
+                    remark.setError("*");
+                    return;
+                }
+                setRescheduleDetails(resch_date.getText().toString().trim(), remark.getText().toString().trim());
+            }
+        });
+    }
+
+    private void setRescheduleDetails(String date, String remark) {
+        getData.SetReschedule(cust_gid, date, Common.convertDateString(selectedDate, "dd/MM/yyyy"), remark, new NetworkResult() {
+            @Override
+            public void handlerResult(String result) {
+                Toast.makeText(getActivity(), result, Toast.LENGTH_LONG).show();
+            }
+
+            @Override
+            public void handlerError(String result) {
+                Toast.makeText(getActivity(), result, Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+
+    @Override
+    public void onDestroyView() {
+        fabNext.show();
+        fabPrevious.show();
+        Toolbar toolbar = ((DashBoardActivity) getActivity()).findViewById(R.id.toolbar);
+        toolbar.getMenu().clear();
+        toolbar.inflateMenu(R.menu.dash_board);
+        adapter.setAction(false);
+        super.onDestroyView();
+    }
+
+    @Override
+    public void onDestroy() {
+        fabNext.show();
+        fabPrevious.show();
+        Toolbar toolbar = ((DashBoardActivity) getActivity()).findViewById(R.id.toolbar);
+        toolbar.getMenu().clear();
+        toolbar.inflateMenu(R.menu.dash_board);
+        adapter.setAction(false);
+        super.onDestroy();
+    }
+
+    private DatePickerDialog.OnDateSetListener setDatepicker() {
+        DatePickerDialog.OnDateSetListener onDateSetListener = new DatePickerDialog.OnDateSetListener() {
+
+            @Override
+            public void onDateSet(DatePicker view, int year, int monthOfYear,
+                                  int dayOfMonth) {
+
+                resch_date.setText(dayOfMonth + "/" + (monthOfYear + 1) + "/" + year);
+
+            }
+
+        };
+        return onDateSetListener;
     }
 }

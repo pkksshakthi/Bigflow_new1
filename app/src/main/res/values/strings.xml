@@ -11,6 +11,7 @@
     <string name="remember">Remember</string>
     <string name="search">Search</string>
     <string name="edit"><u>Edit</u></string>
+    <string name="submit">Submit</string>
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
@@ -22,8 +23,11 @@
     <string name="error_loading">Error on Loading.!</string>
     <string name="Promise_to_buy">Promise to Buy</string>
     <string name="Promise_to_pay">Promise to Pay</string>
+    <string name="choose_date">Choose Date</string>
+    <string name="choose">Choose</string>
     <string name="from_date">From Date</string>
     <string name="to_date">To Date</string>
+    <string name="click_again_exit">click again to exit</string>
 
     <!--Company Details-->
     <string name="company_name">Vsolv Engineering India Pvt Ltd</string>

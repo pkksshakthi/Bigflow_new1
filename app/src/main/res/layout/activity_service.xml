@@ -7,86 +7,101 @@
     android:orientation="vertical"
     tools:context="view.activity.ServiceActivity">
 
-
-    <android.support.v7.widget.CardView
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="10dp"
-        android:layout_marginTop="10dp"
-        android:layout_marginRight="10dp"
-        app:cardCornerRadius="3dp">
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="vertical">
 
-        <LinearLayout
+        <android.support.v7.widget.CardView
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical">
-
-            <AutoCompleteTextView
-                android:id="@+id/auto_product_service"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_alignParentTop="true"
-                android:layout_centerHorizontal="true"
-                android:drawableRight="@drawable/ic_action_search"
-                android:hint="Product Name" />
+            android:layout_height="wrap_content"
+            android:layout_margin="5dp"
+            app:cardCornerRadius="3dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
+                android:layout_height="match_parent"
+                android:orientation="vertical">
 
-
-                <EditText
-                    android:id="@+id/txt_productcount"
-                    android:layout_width="300dp"
+                <AutoCompleteTextView
+                    android:id="@+id/auto_product_service"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Product Count"
-                    android:inputType="number"
-                    android:padding="10dp" />
+                    android:layout_alignParentTop="true"
+                    android:layout_centerHorizontal="true"
+                    android:drawableRight="@drawable/ic_action_search"
+                    android:hint="Product Name"
+                    android:theme="@style/ButtonTheme" />
 
-                <ImageButton
-                    android:id="@+id/btnadd_service"
-                    android:layout_width="wrap_content"
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:src="@drawable/ic_action_add"
-                    android:tooltipText="Add" />
+                    android:orientation="horizontal">
+
+
+                    <EditText
+                        android:id="@+id/txt_productcount"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:maxLength="3"
+                        android:hint="Product Count"
+                        android:inputType="number"
+                        android:theme="@style/ButtonTheme" />
+
+                    <ImageButton
+                        android:id="@+id/btnadd_service"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.5"
+                        android:src="@drawable/ic_action_add"
+                        android:theme="@style/ButtonTheme"
+                        android:tooltipText="Add" />
+
+                </LinearLayout>
+            </LinearLayout>
+        </android.support.v7.widget.CardView>
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+
+                <TableLayout
+                    android:id="@+id/tbl_layout_service"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                </TableLayout>
+
 
             </LinearLayout>
-        </LinearLayout>
-    </android.support.v7.widget.CardView>
+
+        </ScrollView>
+    </LinearLayout>
 
 
-    <ScrollView
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="10dp">
+        android:layout_height="0dp"
+        android:layout_weight="0.1"
+        android:background="@color/colorWhite"
+        android:orientation="horizontal">
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical">
-
-            <TableLayout
-                android:id="@+id/tbl_layout_service"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="10dp">
-
-            </TableLayout>
-
-            <Button
-                android:id="@+id/btnsubmit_service"
-                android:layout_width="200dp"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:background="@drawable/submit_button"
-                android:padding="10dp"
-                android:shadowColor="#A8A8A8"
-                android:text="Submit"
-                android:textColor="@color/colorWhite"
-                android:tooltipText="Submit" />
-        </LinearLayout>
-
-    </ScrollView>
-
+        <Button
+            android:id="@+id/btnsubmit_service"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_margin="5dp"
+            android:layout_weight="1"
+            android:background="@color/colorAccent"
+            android:text="Submit" />
+    </LinearLayout>
 </LinearLayout>

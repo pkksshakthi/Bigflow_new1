@@ -5,15 +5,12 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.view.Menu;
-import android.view.MenuItem;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import constant.Constant;
 import models.Variables;
-import DataBase.DBTables;
 
 
 public class DataBaseHandler extends SQLiteOpenHelper {
@@ -25,28 +22,22 @@ public class DataBaseHandler extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase sqLiteDatabase) {
-//        String query = "CREATE TABLE gal_mst_tmenu (" +
-//                "  menu_gid int  NOT NULL," +
-//                "  menu_parent_gid integer NOT NULL," +
-//                "  menu_name varchar(64) NOT NULL," +
-//                "  menu_link varchar(128) DEFAULT NULL," +
-//                "  menu_displayorder integer NOT NULL DEFAULT '0'," +
-//                "  menu_level integer NOT NULL DEFAULT '0'" +
-//                ") ";
-//        sqLiteDatabase.execSQL(query);
-
 
         sqLiteDatabase.execSQL(DBTables.CREATE_TABLE_Menu.toString());
         sqLiteDatabase.execSQL(DBTables.CREATE_TABLE_LatLong.toString());
         sqLiteDatabase.execSQL(DBTables.CUSTOMER_ADD_SCHEDULE);
         sqLiteDatabase.execSQL(DBTables.EMPLOYEE);
         sqLiteDatabase.execSQL(DBTables.TEMPTABLE);
+        sqLiteDatabase.execSQL(DBTables.CREATE_TABLE_DeviceInfo);
 
     }
 
     @Override
-    public void onUpgrade(SQLiteDatabase sqLiteDatabase, int i, int i1) {
-
+    public void onUpgrade(SQLiteDatabase sqLiteDatabase, int oldVersion, int newVersion) {
+        sqLiteDatabase.execSQL(DBTables.CREATE_TABLE_DeviceInfo);
+        sqLiteDatabase.execSQL(DBTables.ALTER_TABLE_LatLong);
+        sqLiteDatabase.execSQL(DBTables.TEMPTABLE_UPDATE);
+        sqLiteDatabase.execSQL(DBTables.CUSTOMER_ADDSCHEDULE_UPDATE);
     }
 
     public String Insert(String TableName, ContentValues contentValues) {
@@ -127,7 +118,8 @@ public class DataBaseHandler extends SQLiteOpenHelper {
         }
 
         SQLiteDatabase sqLiteDatabase = dataBaseHandler.getReadableDatabase();
-        Cursor cursor = sqLiteDatabase.rawQuery("select latlong_gid,latlong_lat,latlong_long,latlong_date,latlong_emp_gid,entity_gid " +
+        Cursor cursor = sqLiteDatabase.rawQuery("select latlong_gid,latlong_lat,latlong_long,latlong_locationname," +
+                "latlong_date,latlong_emp_gid,entity_gid " +
                 "from fet_trn_tlatlong where latlong_issync = 'N';", null);
         List<Variables.Location> list = new ArrayList<>();
         if (cursor.moveToFirst()) {
@@ -136,6 +128,7 @@ public class DataBaseHandler extends SQLiteOpenHelper {
                 location.latlong_gid = cursor.getInt(cursor.getColumnIndex("latlong_gid"));
                 location.latlong_lat = cursor.getDouble(cursor.getColumnIndex("latlong_lat"));
                 location.latlong_long = cursor.getDouble(cursor.getColumnIndex("latlong_long"));
+                location.latlong_locationname = cursor.getString(cursor.getColumnIndex("latlong_locationname"));
                 location.latlong_date = cursor.getString(cursor.getColumnIndex("latlong_date"));
                 location.emp_gid = cursor.getInt(cursor.getColumnIndex("latlong_emp_gid"));
                 location.entity_gid = cursor.getInt(cursor.getColumnIndex("entity_gid"));
@@ -146,6 +139,29 @@ public class DataBaseHandler extends SQLiteOpenHelper {
         cursor.close();
         return list;
 
+    }
+
+    public List<Variables.DeviceInfo> getDeviceInfo(Context context) {
+        if (dataBaseHandler == null) {
+            dataBaseHandler = new DataBaseHandler(context);
+        }
+
+        SQLiteDatabase sqLiteDatabase = dataBaseHandler.getReadableDatabase();
+        Cursor cursor = sqLiteDatabase.rawQuery("select deviceinfo_gid,deviceinfo_data,deviceinfo_date,deviceinfo_issync " +
+                "from gal_trn_tdeviceinfo where deviceinfo_issync = 'N'; ", null);
+        List<Variables.DeviceInfo> list = new ArrayList<>();
+
+        if (cursor.moveToFirst()) {
+            do {
+                Variables.DeviceInfo deviceInfo = new Variables.DeviceInfo();
+                deviceInfo.DeviceInfo_Gid = cursor.getInt(cursor.getColumnIndex("deviceinfo_gid"));
+                deviceInfo.DeviceInfo_Date = cursor.getString(cursor.getColumnIndex("deviceinfo_date"));
+                deviceInfo.DeviceInfo_Data = cursor.getString(cursor.getColumnIndex("deviceinfo_data"));
+                list.add(deviceInfo);
+            } while (cursor.moveToNext());
+        }
+        cursor.close();
+        return list;
     }
 
 

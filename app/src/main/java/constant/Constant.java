@@ -6,7 +6,7 @@ import models.Variables;
 
 public class Constant {
     public static final String DATABASENAME = "VSOLV";
-    public static final int DATABASE_VERSION = 1;
+    public static final int DATABASE_VERSION = 3;
     public static String IP_ADDRESS = "174.138.120.196";
     public static String HOST_NAME = "bigflowdemo";
     public static String URL = "https://" + IP_ADDRESS + "/" + HOST_NAME + "/";
@@ -38,6 +38,7 @@ public class Constant {
     public static String latlong_gid = "latlong_gid";
     public static String latitude = "latlong_lat";
     public static String longitude = "latlong_long";
+    public static String location_name = "latlong_locationname";
     public static String latlong_emp_gid = "latlong_emp_gid";
     public static String latlong_date = "latlong_date";
     public static String latlong_issync = "latlong_issync";
@@ -54,6 +55,7 @@ public class Constant {
     public static final String AScustomer_name = "ascustomer_name";
     public static final String ASlocation_name = "ascustomer_location_name";
     public static final String ASdisplay_name = "asdisplay_name";
+    public static final String AStype_name = "astype_name";
     public static final String ASismanagement = "asis_management";
     public static final String ASstatus = "asstatus";
     public static final String ASiseditable = "asis_editable";
@@ -128,5 +130,45 @@ public class Constant {
     public static final String title_route_summary = "Route";
     public static final String title_service_summary = "Service";
     public static final String title_fet_review = "FET Review";
+    public static final String title_collection = "Collection";
+    public static final String title_sales_planning = "Sales Plan";
 
+
+    public static final String status_review_pending = "PENDING";
+    public static final String status_review_approved = "APPROVE";
+    public static final String status_review_reject = "REJECT";
+
+    //bundle key string
+    public static final String key_employee_gid = "employee_gid";
+    public static final String key_employee_name = "employee_name";
+    public static final String key_customer_gid = "customer_gid";
+    public static final String key_sch_review_status = "sch_review_status";
+    public static final String key_sch_type_gid = "sch_type_gid";
+    public static final String key_cust_group_gid = "cust_group_gid";
+    public static final String key_loaction_gid = "location_gid";
+    public static final String key_fdate = "from_date";
+    public static final String key_tdate = "to_date";
+    public static final String key_followup_fdate = "followup_fdate";
+    public static final String getKey_followup_tdate = "followup_tdate";
+    public static final String key_reschedule_fdate = "reschedule_fdate";
+    public static final String key_reschedule_tdate = "reschedule_tdate";
+    public static final String key_cust_mode = "cust_mode";
+    public static final String key_cust_type = "cust_type";
+    public static final String key_territory_gid = "territory_gid";
+    public static final String key_route_gid = "route_gid";
+    public static final String key_cust_category = "cust_category";
+    public static final String key_cust_size = "cust_size";
+    public static final String key_cust_constitution = "cust_constitution";
+    public static final String key_cust_type_gid = "cust_type_gid";
+    public static final String key_cust_size_gid = "cust_size_gid";
+    public static final String key_cust_mode_gid = "cust_mode_gid";
+    public static final String key_cust_category_gid = "cust_category_gid";
+    public static final String key_cust_constitution_gid = "cust_constitution_gid";
+    public static final String key_customer_name = "customer_name";
+    public static final String key_action = "action";
+    public static final String key_soheader_gid = "soheader_gid";
+    public static final String key_schedule_gid = "schedule_gid";
+
+    //Date format
+    public static final String date_display_format = "dd/MM/yyyy";
 }

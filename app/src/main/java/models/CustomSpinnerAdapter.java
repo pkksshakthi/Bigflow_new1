@@ -34,10 +34,10 @@ public class CustomSpinnerAdapter extends ArrayAdapter<Variables.Details> {
     private View getCustomerDDView(int position, View convertView, ViewGroup parent) {
         if (convertView == null) {
             LayoutInflater inflater = LayoutInflater.from(mContext);
-            convertView = inflater.inflate(R.layout.list_item, parent, false);
+            convertView = inflater.inflate(R.layout.spinner_dropdown_item, parent, false);
         }
         Variables.Details details = mDetailsList.get(position);
-        TextView textView = convertView.findViewById(R.id.txtList_item);
+        TextView textView = (TextView) convertView;
         textView.setText(details.data);
 
         return convertView;
@@ -57,10 +57,10 @@ public class CustomSpinnerAdapter extends ArrayAdapter<Variables.Details> {
     public View getCustomerView(int position, View convertView, ViewGroup parent) {
         if (convertView == null) {
             LayoutInflater inflater = LayoutInflater.from(mContext);
-            convertView = inflater.inflate(R.layout.list_header, parent, false);
+            convertView = inflater.inflate(R.layout.spinner_item, parent, false);
         }
 
-        TextView textView = convertView.findViewById(R.id.txtList_header);
+        TextView textView = (TextView) convertView;
         Variables.Details details = mDetailsList.get(position);
         textView.setText(details.data);
 

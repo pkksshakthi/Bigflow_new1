@@ -25,7 +25,7 @@ public class HistroryAdapter extends RecyclerView.Adapter<HistroryAdapter.histor
     @Override
     public historyViewholder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         LayoutInflater inflater = LayoutInflater.from(mContext);
-        View view = inflater.inflate(R.layout.list_item_history, parent,false);
+        View view = inflater.inflate(R.layout.list_item_history, parent, false);
         return new historyViewholder(view);
     }
 
@@ -35,7 +35,20 @@ public class HistroryAdapter extends RecyclerView.Adapter<HistroryAdapter.histor
         holder.followupDate.setText(history.schedule_date);
         holder.employeeName.setText(history.employee_name);
         holder.scheduleType.setText(history.schedule_type);
-        holder.followUp.setText(history.followup);
+        if (history.schedule_status.equals("OPEND")) {
+            holder.scheduleType.setTextColor(mContext.getResources().getColor(R.color.open));
+        } else {
+            holder.scheduleType.setTextColor(mContext.getResources().getColor(R.color.TextPrimary));
+        }
+
+        if (!history.followup_date.equals("null")) {
+            holder.followUp.setText("Followup Date: " + history.followup_date);
+        } else if (!history.reschedule_date.equals("null")) {
+            holder.followUp.setText("Reschedule Date: " + history.reschedule_date);
+        } else {
+            holder.followUp.setText("");
+        }
+
     }
 
     @Override

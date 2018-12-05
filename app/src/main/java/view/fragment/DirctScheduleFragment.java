@@ -197,7 +197,7 @@ public class DirctScheduleFragment extends Fragment implements View.OnClickListe
 
                         setAdapter();
                     } else {
-                        empty_view.setText(getResources().getString(R.string.error_loading));
+                        empty_view.setText(message);
                     }
 
                 } catch (JSONException e) {
@@ -224,14 +224,14 @@ public class DirctScheduleFragment extends Fragment implements View.OnClickListe
 
         adapter.setOnclickListener(new CustomerAdapter.OnItemClickListener() {
             @Override
-            public void onItemClick(Variables.Customer item, int position) {
-                sessiondata.putInt("customer_id", item.customer_gid);
+            public void onItemClick(View view, Variables.Customer item, int position) {
+                sessiondata.putInt(Constant.key_customer_gid, item.customer_gid);
                 getScheduleType(item.customer_gid);
 
             }
 
             @Override
-            public void onItemLongClick(Variables.Customer item, int position) {
+            public void onItemLongClick(View view, Variables.Customer item, int position) {
 
             }
 
@@ -296,7 +296,7 @@ public class DirctScheduleFragment extends Fragment implements View.OnClickListe
             @Override
             public void handlerResult(String result) {
                 sessiondata = new Bundle();
-                sessiondata.putInt("customer_id", customer_gid);
+                sessiondata.putInt(Constant.key_customer_gid, customer_gid);
                 createDialog();
                 progressDialog.cancel();
             }
@@ -322,9 +322,8 @@ public class DirctScheduleFragment extends Fragment implements View.OnClickListe
                 if (scheduleTypeList.get(position) instanceof Variables.ScheduleType) {
 
                     Variables.ScheduleType scheduleType = (Variables.ScheduleType) scheduleTypeList.get(position);
-                    sessiondata.putInt("schedule_gid", scheduleType.schedule_gid);
-                    sessiondata.putInt("scheduletype_id", scheduleType.schedule_type_id);
-
+                    sessiondata.putInt(Constant.key_schedule_gid, scheduleType.schedule_gid);
+                    sessiondata.putInt(Constant.key_sch_type_gid, scheduleType.schedule_type_id);
                     switch (scheduleType.schedule_type_name) {
                         case Constant.st_booking:
                             gotoSales(scheduleType);
@@ -389,7 +388,8 @@ public class DirctScheduleFragment extends Fragment implements View.OnClickListe
             listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                    sessiondata.putLong("sales_gid", listAdapter.getItemId(position));
+                    Variables.Details details_toactivity = (Variables.Details) listAdapter.getItem(position);
+                    sessiondata.putInt(Constant.key_soheader_gid, details_toactivity.gid);
                     salesDialog.cancel();
                     gotoActivity(SalesActivity.class);
                 }

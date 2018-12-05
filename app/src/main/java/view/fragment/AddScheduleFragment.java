@@ -6,6 +6,8 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteTransactionListener;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -17,6 +19,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.SearchView;
 import android.widget.TextView;
@@ -78,9 +81,12 @@ public class AddScheduleFragment extends Fragment implements View.OnClickListene
     private ListView listView;
     private AlertDialog alertDialog, employeeDialog;
     private List<Variables.Details> empDetailList;
-    private int selected_employee_gid;
-    private List<Integer> employee_gid, route_gid, cluster_gid;
+    private List<Integer> integerList;
     private SearchView customerSearch;
+    private Bundle bundle;
+    private int selected_employee_gid;
+    private String selected_date;
+    private TextView reload;
 
     public AddScheduleFragment() {
         // Required empty public constructor
@@ -133,23 +139,28 @@ public class AddScheduleFragment extends Fragment implements View.OnClickListene
         empty_view = fragmentView.findViewById(R.id.addSchedule_Empty_view);
         filter = fragmentView.findViewById(R.id.txtAddSchedule_Filter);
         employee = fragmentView.findViewById(R.id.txtEmployee);
+        reload = fragmentView.findViewById(R.id.txtASReload);
     }
 
     private void initializeView() {
         progressDialog = new ProgressDialog(getContext());
         progressDialog.setTitle(getResources().getString(R.string.loading));
         progressDialog.setCancelable(false);
+
+        selected_date = Common.convertDateString(new Date(), Constant.date_display_format);
+
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(this.getActivity()));
         customerSearch.setQueryHint("Search");
         mCustomerFilter = new ArrayList<>();
+
         filter.setOnClickListener(this);
         employee.setOnClickListener(this);
+        reload.setOnClickListener(this);
+
         getData = new GetData(getActivity());
+        bundle = new Bundle();
         empDetailList = new ArrayList<>();
-        employee_gid = new ArrayList<>();
-        route_gid = new ArrayList<>();
-        cluster_gid = new ArrayList<>();
         customerSearch.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
@@ -178,11 +189,16 @@ public class AddScheduleFragment extends Fragment implements View.OnClickListene
             return;
         }
         progressDialog.show();
-        getData.LoadAddScheduleFilteredData(employee_gid, route_gid, cluster_gid, new Date()
+        getLoadData(getFilteredList());
+
+    }
+
+    private void getLoadData(final Variables.paramsAddSchedule params) {
+        getData.LoadAddScheduleFilteredData(params.employee_gid, params.route_gid, params.cluster_gid, Common.convertDate(selected_date, Constant.date_display_format)
                 , new NetworkResult() {
                     @Override
                     public void handlerResult(String result) {
-                        mCustomerFilter = getData.CustomerFilterList(1);
+                        mCustomerFilter = getData.CustomerFilterList(params);
                         empDetailList = getData.EmployeeFilterList();
                         if (empDetailList.size() == 1) {
                             selected_employee_gid = empDetailList.get(0).gid;
@@ -197,7 +213,46 @@ public class AddScheduleFragment extends Fragment implements View.OnClickListene
                         progressDialog.cancel();
                     }
                 });
+    }
 
+    private Variables.paramsAddSchedule getFilteredList() {
+        Variables.paramsAddSchedule params = new Variables.paramsAddSchedule();
+
+        int emp_gid = bundle.getInt(Constant.key_employee_gid, 0);
+        integerList = new ArrayList<>();
+        if (emp_gid > 0) {
+            integerList.add(emp_gid);
+            selected_employee_gid = emp_gid;
+            employee.setText(bundle.getString(Constant.key_employee_name));
+        } else {
+            employee.setText("Employee");
+        }
+        params.employee_gid = integerList;
+
+
+        int route_gid = bundle.getInt(Constant.key_route_gid, 0);
+        integerList = new ArrayList<>();
+        if (route_gid > 0) {
+            integerList.add(route_gid);
+        }
+        params.route_gid = integerList;
+
+        int clust_gid = bundle.getInt(Constant.key_territory_gid, 0);
+        integerList = new ArrayList<>();
+        if (clust_gid > 0) {
+            integerList.add(clust_gid);
+        }
+        params.cluster_gid = integerList;
+
+        params.cust_mode_gid = bundle.getInt(Constant.key_cust_mode_gid, 0);
+        params.cust_type = bundle.getString(Constant.key_cust_type, "");
+        params.cust_size_gid = bundle.getInt(Constant.key_cust_size_gid, 0);
+        params.cust_category_gid = bundle.getInt(Constant.key_cust_category_gid, 0);
+        params.cust_constitution_gid = bundle.getInt(Constant.key_cust_constitution_gid, 0);
+
+        selected_date = bundle.getString(Constant.key_fdate, selected_date);
+        getActivity().setTitle("Add Schedule(" + selected_date + ")");
+        return params;
     }
 
     public void setAdapter() {
@@ -209,7 +264,7 @@ public class AddScheduleFragment extends Fragment implements View.OnClickListene
             @Override
             public void onItemClick(Variables.Customer item, int position) {
                 if (selected_employee_gid > 0) {
-                    getScheduleType(item, new Date());
+                    getScheduleType(item, selected_date);
                 } else {
                     Toast.makeText(getContext(), "Please choose employee.!", Toast.LENGTH_LONG).show();
                 }
@@ -244,7 +299,7 @@ public class AddScheduleFragment extends Fragment implements View.OnClickListene
         });
 
         if (adapter.getItemCount() == 0) {
-            empty_view.setText("" + getActivity().getResources().getString(R.string.loading));
+            empty_view.setText("" + getActivity().getResources().getString(R.string.no_data_available));
             setVisibility(View.GONE, View.VISIBLE, View.GONE);
         } else {
             setVisibility(View.VISIBLE, View.GONE, View.GONE);
@@ -256,7 +311,7 @@ public class AddScheduleFragment extends Fragment implements View.OnClickListene
         if (mCustomerFilter.size() > 0) {
             for (Object d : mCustomerFilter) {
                 if (d instanceof Variables.Customer) {
-                    if (((Variables.Customer)d).customer_name.toLowerCase().replaceAll("\\s+", "").contains(text.toLowerCase().replaceAll("\\s+", ""))) {
+                    if (((Variables.Customer) d).customer_name.toLowerCase().replaceAll("\\s+", "").contains(text.toLowerCase().replaceAll("\\s+", ""))) {
                         temp.add(d);
                     }
                 } else {
@@ -271,14 +326,14 @@ public class AddScheduleFragment extends Fragment implements View.OnClickListene
     }
 
     public void setVisibility(int recycleView, int emptyView, int reloadView) {
-        //linearLayout.setVisibility(recycleView);
+        recyclerView.setVisibility(recycleView);
         empty_view.setVisibility(emptyView);
-        //reload.setVisibility(reloadView);
+        reload.setVisibility(reloadView);
     }
 
-    public void getScheduleType(final Variables.Customer pfCustomer, Date date) {
+    public void getScheduleType(final Variables.Customer pfCustomer, String date) {
         progressDialog.show();
-        scheduleTypeList = getData.ScheduledScheduleType(pfCustomer.customer_gid, Common.convertDateString(new Date(), "yyyy-MM-dd"), new NetworkResult() {
+        scheduleTypeList = getData.ScheduledScheduleType(pfCustomer.customer_gid, Common.convertDateString(date, Constant.date_display_format, "yyyy-MM-dd"), new NetworkResult() {
             @Override
             public void handlerResult(String result) {
                 createDialog(pfCustomer);
@@ -352,7 +407,7 @@ public class AddScheduleFragment extends Fragment implements View.OnClickListene
     }
 
 
-    public void saveDetails(String type, List<Integer> customer_gid, List<Integer> scheduleType_gid, List<Integer> schedule_gid) {
+    public void saveDetails(String type, final List<Integer> customer_gid, List<Integer> scheduleType_gid, List<Integer> schedule_gid) {
 
         JSONArray schedulelist = new JSONArray();
         for (int i = 0; i < customer_gid.size(); i++) {
@@ -375,12 +430,13 @@ public class AddScheduleFragment extends Fragment implements View.OnClickListene
             }
 
         }
-        getData.SetScheduleSingle(selected_employee_gid, schedulelist, new Date(), new NetworkResult() {
+        getData.SetScheduleSingle(selected_employee_gid, schedulelist, Common.convertDate(selected_date, Constant.date_display_format), new NetworkResult() {
             @Override
             public void handlerResult(String result) {
                 if (result.equals("SUCCESS")) {
                     Toast.makeText(getContext(), "Schedule Saved Successfully.!", Toast.LENGTH_LONG).show();
                     alertDialog.dismiss();
+                    changeAdapter(customer_gid);
                 } else {
 
                     Snackbar.with(getActivity(), null)
@@ -406,6 +462,35 @@ public class AddScheduleFragment extends Fragment implements View.OnClickListene
         });
     }
 
+    private void changeAdapter(final List<Integer> customer_gid) {
+        progressDialog.show();
+        scheduleTypeList = getData.ScheduledScheduleType(customer_gid.get(0), Common.convertDateString(selected_date, Constant.date_display_format, "yyyy-MM-dd"), new NetworkResult() {
+            @Override
+            public void handlerResult(String result) {
+                if (scheduleTypeList.get(0).toString().equals("Scheduled")) {
+                    DataBaseHandler dataBaseHandler = new DataBaseHandler(getActivity());
+                    SQLiteDatabase df = dataBaseHandler.getWritableDatabase();
+                    String a = "update " + Constant.AStable_name + " set " + Constant.ASstatus + "='OPEND' where " + Constant.AScustomer_gid + "= " + customer_gid.get(0);
+                    df.execSQL(a);
+
+                } else {
+                    DataBaseHandler dataBaseHandler = new DataBaseHandler(getActivity());
+                    SQLiteDatabase df = dataBaseHandler.getWritableDatabase();
+                    String a = "update " + Constant.AStable_name + " set " + Constant.ASstatus + "='' where " + Constant.AScustomer_gid + "= " + customer_gid.get(0);
+                    df.execSQL(a);
+                }
+                mCustomerFilter = getData.CustomerFilterList(getFilteredList());
+                adapter.updateList(mCustomerFilter);
+                progressDialog.cancel();
+            }
+
+            @Override
+            public void handlerError(String result) {
+                progressDialog.cancel();
+            }
+        });
+    }
+
     // TODO: Rename method, update argument and hook method into UI event
     public void onButtonPressed(Uri uri) {
         if (mListener != null) {
@@ -416,12 +501,6 @@ public class AddScheduleFragment extends Fragment implements View.OnClickListene
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-//        if (context instanceof OnFragmentInteractionListener) {
-//            mListener = (OnFragmentInteractionListener) context;
-//        } else {
-//            throw new RuntimeException(context.toString()
-//                    + " must implement OnFragmentInteractionListener");
-//        }
     }
 
     @Override
@@ -435,12 +514,15 @@ public class AddScheduleFragment extends Fragment implements View.OnClickListene
         switch (v.getId()) {
             case R.id.txtAddSchedule_Filter:
                 Intent intent = new Intent(getActivity(), FilterAddScheduleActivity.class);
+                intent.putExtras(bundle);
                 startActivityForResult(intent, filterCode);
                 break;
             case R.id.txtEmployee:
                 createEmployeeDialog();
                 break;
-
+            case R.id.txtASReload:
+                loadData();
+                break;
         }
     }
 
@@ -459,11 +541,9 @@ public class AddScheduleFragment extends Fragment implements View.OnClickListene
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                selected_employee_gid = empDetailList.get(position).gid;
-                employee.setText(empDetailList.get(position).data);
+                bundle.putInt(Constant.key_employee_gid, empDetailList.get(position).gid);
+                bundle.putString(Constant.key_employee_name, empDetailList.get(position).data);
                 employeeDialog.dismiss();
-                employee_gid = new ArrayList<>();
-                employee_gid.add(selected_employee_gid);
                 loadData();
             }
         });
@@ -471,15 +551,16 @@ public class AddScheduleFragment extends Fragment implements View.OnClickListene
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if(requestCode == filterCode){
+        if (requestCode == filterCode) {
 
-            if (resultCode == RESULT_OK){
+            if (resultCode == RESULT_OK) {
+                bundle = new Bundle();
+                bundle = data.getExtras();
+                int t = bundle.getInt(Constant.key_cust_mode_gid, 0);
+                loadData();
+            } else if (resultCode == RESULT_CANCELED) {
 
-               // tvResultCode.setText("RESULT_OK");
-
-            }else if(resultCode == RESULT_CANCELED){
-
-               // tvResultCode.setText("RESULT_CANCELED");
+                // tvResultCode.setText("RESULT_CANCELED");
 
             }
 

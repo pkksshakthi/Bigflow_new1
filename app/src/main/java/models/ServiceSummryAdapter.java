@@ -11,15 +11,17 @@ import android.widget.TextView;
 
 import com.vsolv.bigflow.R;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class ServiceSummryAdapter extends RecyclerView.Adapter<ServiceSummryAdapter.CustomerViewHolder> {
     private Context mCtx;
-    private List<Variables.ServiceSummary_List> customerList;
+    private List<Variables.ServiceSummary> customerList;
+    private List<Variables.ServiceSummary> selectedList;
     private OnItemClickListener mListener;
 
     public interface OnItemClickListener {
-        void onItemClick(Variables.ServiceSummary_List item,int position);
+        void onItemClick(Variables.ServiceSummary item, int position);
 
     }
 
@@ -29,10 +31,9 @@ public class ServiceSummryAdapter extends RecyclerView.Adapter<ServiceSummryAdap
 
     public class CustomerViewHolder extends RecyclerView.ViewHolder {
         TextView customerName, productName, Date;
-        private View view;
+
         public CustomerViewHolder(View itemView, final OnItemClickListener listener) {
             super(itemView);
-            view =itemView;
             customerName = itemView.findViewById(R.id.txtCustomerName);
             productName = itemView.findViewById(R.id.txtProductName);
             Date = itemView.findViewById(R.id.txtDate);
@@ -41,11 +42,21 @@ public class ServiceSummryAdapter extends RecyclerView.Adapter<ServiceSummryAdap
                 @Override
                 public void onClick(View v) {
 
-                    if (listener!=null){
-                        int position =getAdapterPosition();
+                    if (listener != null) {
+                        int position = getAdapterPosition();
 
-                        if (position!=RecyclerView.NO_POSITION){
-                            listener.onItemClick(getitem(position),position);
+                        if (position != RecyclerView.NO_POSITION) {
+                            boolean isSelected = getitem(position).is_selected;
+                            if (!isSelected) {
+                                selectedList.add(customerList.get(position));
+                                customerList.get(position).is_selected = true;
+                                customerName.setCompoundDrawablesWithIntrinsicBounds(null, null, mCtx.getResources().getDrawable(R.drawable.ic_action_check), null);
+                            } else {
+                                selectedList.remove(customerList.get(position));
+                                customerList.get(position).is_selected = false;
+                                customerName.setCompoundDrawablesWithIntrinsicBounds(null, null, null, null);
+                            }
+                            listener.onItemClick(getitem(position), position);
                         }
                     }
 
@@ -55,35 +66,30 @@ public class ServiceSummryAdapter extends RecyclerView.Adapter<ServiceSummryAdap
         }
     }
 
-    public ServiceSummryAdapter(Context mCtx, List<Variables.ServiceSummary_List> List) {
+    public ServiceSummryAdapter(Context mCtx, List<Variables.ServiceSummary> List) {
         this.mCtx = mCtx;
         this.customerList = List;
+        selectedList = new ArrayList<>();
     }
 
     @NonNull
     @Override
     public CustomerViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         LayoutInflater inflater = LayoutInflater.from(mCtx);
-        View view = inflater.inflate(R.layout.layout_servicesummary, null);
-        return new CustomerViewHolder(view,mListener);
+        View view = inflater.inflate(R.layout.layout_servicesummary, parent, false);
+        return new CustomerViewHolder(view, mListener);
     }
 
     @Override
     public void onBindViewHolder(@NonNull final CustomerViewHolder holder, int position) {
 
-        final Variables.ServiceSummary_List customer = customerList.get(position);
-
-        holder.customerName.setText(customer.getCustomername());
-        holder.productName.setText(customer.getProductname());
-        holder.Date.setText(customer.getDate());
-        holder.view.setBackgroundColor(customer.isSelected() ? Color.GRAY : Color.WHITE);
-        holder.view.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                customer.setSelected(!customer.isSelected());
-                holder.view.setBackgroundColor(customer.isSelected() ? Color.GRAY : Color.WHITE);
-            }
-        });
+        final Variables.ServiceSummary customer = customerList.get(position);
+        holder.customerName.setText(customer.customer_name.toUpperCase());
+        holder.productName.setText(customer.product_name);
+        holder.Date.setText(customer.service_date);
+        if (!customerList.get(position).is_selected) {
+            holder.customerName.setCompoundDrawablesWithIntrinsicBounds(null, null, null, null);
+        }
     }
 
     @Override
@@ -91,11 +97,24 @@ public class ServiceSummryAdapter extends RecyclerView.Adapter<ServiceSummryAdap
         return customerList.size();
     }
 
-    public void updateList(List<Variables.ServiceSummary_List> list){
+    public void updateList(List<Variables.ServiceSummary> list) {
         customerList = list;
         notifyDataSetChanged();
     }
-    public Variables.ServiceSummary_List getitem(int position){
+
+    public Variables.ServiceSummary getitem(int position) {
         return customerList.get(position);
+    }
+
+    public List<Variables.ServiceSummary> getCustomerList() {
+        return customerList;
+    }
+
+    public List<Variables.ServiceSummary> getSelectedList() {
+        return selectedList;
+    }
+
+    public void clearSelectedList() {
+        selectedList = new ArrayList<>();
     }
 }

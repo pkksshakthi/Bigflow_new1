@@ -4,18 +4,14 @@ import android.app.DatePickerDialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.DatePicker;
 import android.widget.EditText;
@@ -36,18 +32,23 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.text.DateFormatSymbols;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
+import DataBase.GetData;
 import constant.Constant;
 import models.Common;
+import models.CustomDialogListener;
+import models.CustomSpinnerAdapter;
 import models.ServiceSummryAdapter;
 import models.UserDetails;
 import models.Variables;
 import network.CallbackHandler;
+import presenter.NetworkResult;
 import presenter.VolleyCallback;
+import view.activity.DashBoardActivity;
 
 import static java.lang.Integer.parseInt;
 
@@ -59,38 +60,25 @@ public class ServiceSummaryFragment extends Fragment implements View.OnClickList
     private View fragmentView;
     private LinearLayout linearLayout;
     private RecyclerView recyclerView;
-    private TextView empty_view, reload;
+    private TextView empty_view, reload, txtCourierDate;
     private Bundle sessiondata;
     private ProgressDialog progressDialog;
-    private FloatingActionButton Courier;
-    private ArrayList<Variables.Courier> courierList = new ArrayList<>();
-    private ArrayList<Variables.ServiceSummary_List> serviceList;
+    private ArrayList<Variables.Details> courierList;
+    private List<Variables.ServiceSummary> serviceList;
     private Spinner spnCourier, spnmode, spnsendto;
-    private EditText txtdate, txtpacket, edtweight, AWB_no;
-    private int mYear, mMonth, mDay;
-    private String[] mode_items = new String[]{"AIR", "ROAD", "SHIP"};
-    private String[] send_items = new String[]{"SEND TO CENTRAL OFFICE", "SEND TO BRANCH OFFICE"};
+    private EditText txtpacket, edtweight, AWB_no;
+    private String[] mode_items;
+    private String[] send_items;
     private DatePickerDialog.OnDateSetListener datePickerListener = new DatePickerDialog.OnDateSetListener() {
-
         public void onDateSet(DatePicker view, int selectedYear,
                               int selectedMonth, int selectedDay) {
-            String year1 = String.valueOf(selectedYear);
-            String month_todb = String.valueOf(selectedMonth + 1);
-            int month1 = selectedMonth + 1;
-            String day1 = String.valueOf(selectedDay);
-            String day = String.format("%02d", parseInt(day1));
-            String month_to_db = String.format("%02d", parseInt(month_todb));
-            String month = new DateFormatSymbols().getShortMonths()[month1 - 1];
-            String Date = day + "/" + month + "/" + year1;
-            // String Date_db = day + "/" + month_to_db + "/" + year1;
-            String Date_db = year1 + "-" + month_to_db + "-" + day;
 
-            txtdate.setText(Date);
-            Variables.courierset.Date = Date_db;
+            txtCourierDate.setText(selectedDay + "/" + (selectedMonth + 1) + "/" + selectedYear);
 
         }
     };
     private SearchView customerSearch;
+    private GetData getdata;
 
     public static ServiceSummaryFragment newInstance(String Title, String param2) {
         ServiceSummaryFragment fragment = new ServiceSummaryFragment();
@@ -115,7 +103,7 @@ public class ServiceSummaryFragment extends Fragment implements View.OnClickList
     @Override
     public View onCreateView(LayoutInflater inflater, final ViewGroup container,
                              Bundle savedInstanceState) {
-        getActivity().setTitle("Bigflow");
+        getActivity().setTitle(Constant.title_service_summary);
         View view = inflater.inflate(R.layout.fragment_servicesummary, container, false);
         fragmentView = view;
         loadView(view);
@@ -126,310 +114,31 @@ public class ServiceSummaryFragment extends Fragment implements View.OnClickList
     }
 
     private void loadView(View view) {
-        linearLayout = (LinearLayout) view.findViewById(R.id.linearDirect);
+        linearLayout = (LinearLayout) view.findViewById(R.id.linearService);
         recyclerView = (RecyclerView) view.findViewById(R.id.ServiceRecyclerView);
-        customerSearch = fragmentView.findViewById(R.id.customer_search);
-        customerSearch.setQueryHint("Search");
-        empty_view = view.findViewById(R.id.empty_view);
-        reload = view.findViewById(R.id.custReload);
-        Courier = view.findViewById(R.id.Couriericon);
-
+        customerSearch = view.findViewById(R.id.customer_search);
+        empty_view = view.findViewById(R.id.txtEmptyView);
+        reload = view.findViewById(R.id.txtSSReload);
     }
 
-    private void forceopen() {
-        LayoutInflater inflater = getLayoutInflater();
-        View alertLayout = inflater.inflate(R.layout.alert_courier, null);
-        AWB_no = alertLayout.findViewById(R.id.et_AWB);
-        txtpacket = (EditText) alertLayout.findViewById(R.id.et_packets);
-        spnCourier = (Spinner) alertLayout.findViewById(R.id.spn_courier);
-        spnmode = (Spinner) alertLayout.findViewById(R.id.mode);
-        spnsendto = (Spinner) alertLayout.findViewById(R.id.sendto);
-        txtdate = (EditText) alertLayout.findViewById(R.id.et_date);
-        edtweight = (EditText) alertLayout.findViewById(R.id.et_weight);
-
-
-        ArrayAdapter<Variables.Courier> courierArrayAdapter = new ArrayAdapter<Variables.Courier>(getActivity(), android.R.layout.simple_spinner_dropdown_item, courierList);
-        spnCourier.setAdapter(courierArrayAdapter);
-
-        ArrayAdapter<String> modeArrayAdapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_spinner_dropdown_item, mode_items);
-        spnmode.setAdapter(modeArrayAdapter);
-
-        ArrayAdapter<String> sendtoArrayAdapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_spinner_dropdown_item, send_items);
-        spnsendto.setAdapter(sendtoArrayAdapter);
-
-        spnCourier.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                Variables.Courier swt = (Variables.Courier) parent.getItemAtPosition(position);
-                Variables.courierset.courier_id = swt.getId();
-            }
-
-            public void onNothingSelected(AdapterView<?> parent) {
-
-            }
-        });
-
-        spnmode.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                Variables.courierset.Mode = parent.getItemAtPosition(position).toString();
-            }
-
-            public void onNothingSelected(AdapterView<?> parent) {
-
-            }
-        });
-
-        spnsendto.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                Variables.courierset.Send_to = parent.getItemAtPosition(position).toString();
-
-            }
-
-            public void onNothingSelected(AdapterView<?> parent) {
-
-            }
-        });
-
-        txtdate.setOnClickListener(new View.OnClickListener() {
-
-            @Override
-            public void onClick(View view) {
-                final Calendar c = Calendar.getInstance();
-                mYear = c.get(Calendar.YEAR);
-                mMonth = c.get(Calendar.MONTH);
-                mDay = c.get(Calendar.DAY_OF_MONTH);
-                DatePickerDialog datePickerDialog = new DatePickerDialog(getActivity(), datePickerListener, mYear, mMonth, mDay);
-                datePickerDialog.getDatePicker().setMaxDate(c.getTimeInMillis());
-                datePickerDialog.setCancelable(false);
-                datePickerDialog.setTitle("Choose Remark date");
-                datePickerDialog.show();
-            }
-        });
-
-        final AlertDialog.Builder alert = new AlertDialog.Builder(getActivity());
-        alert.setTitle("Courier Details");
-        alert.setCancelable(false);
-        alert.setView(alertLayout);
-
-        alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-            }
-        });
-
-        alert.setPositiveButton("Send", new DialogInterface.OnClickListener() {
-
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-
-                Variables.courierset.AWB_no = AWB_no.getText().toString();
-                Variables.courierset.Packet = txtpacket.getText().toString();
-                Variables.courierset.Weight = edtweight.getText().toString();
-                Variables.courierset courierset = new Variables.courierset();
-                final JSONArray Dispatcharray = new JSONArray();
-                JSONObject dispatchobj = new JSONObject();
-                if (!courierset.anyUnset()) {
-                    try {
-                        dispatchobj.put("courier_gid", courierset.getCourierid());
-                        dispatchobj.put("Dispatch_date", courierset.getDate());
-                        dispatchobj.put("send_by", UserDetails.getUser_id());
-                        dispatchobj.put("awbno", courierset.getAWB_no());
-                        dispatchobj.put("dispatch_mode", courierset.getMode());
-                        dispatchobj.put("dispatch_type", "Ndoc");
-                        dispatchobj.put("packets", courierset.getPacket());
-                        dispatchobj.put("weight", courierset.getWeight());
-                        dispatchobj.put("dispatch_to", courierset.getSend_to());
-                        dispatchobj.put("address", "");
-                        dispatchobj.put("city", "");
-                        dispatchobj.put("state", "");
-                        dispatchobj.put("pincode", "");
-                        dispatchobj.put("remark", "aaaaa");
-                        dispatchobj.put("returned", "N");
-                        dispatchobj.put("returned_on", "");
-                        dispatchobj.put("returned_remark", "");
-                        dispatchobj.put("pod", "");
-                        dispatchobj.put("pod_image", "");
-                        dispatchobj.put("isactive", "Y");
-                        dispatchobj.put("isremoved", "N");
-                        dispatchobj.put("dispatch_gid", 0);
-                        dispatchobj.put("action", "Insert");
-                        dispatchobj.put("type", "SERVICE");
-                        dispatchobj.put("in_out", courierset.getinout_flag());
-                        dispatchobj.put("status", courierset.getSend_to());
-                        Dispatcharray.put(dispatchobj);
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-
-
-                } else {
-
-                    Toast.makeText(getContext(), "Fill All The Field", Toast.LENGTH_LONG).show();
-                }
-                final JSONArray SRarray = new JSONArray();
-                for (Variables.ServiceSummary_List productdtl : serviceList) {
-                    JSONObject objDetails = new JSONObject();
-
-                    if (productdtl.isSelected()) {
-                        try {
-                            objDetails.put("product_gid", productdtl.getProductgid());
-                            objDetails.put("product_slno", productdtl.getProductSlno());
-                            objDetails.put("invoice_no", "");
-                            objDetails.put("remark", productdtl.getRemark());
-                            objDetails.put("service_gid", productdtl.getservicegid());
-                            objDetails.put("dispatch_mode", "EXECUTIVE");
-                            objDetails.put("pay_by", productdtl.getService_courierexp());
-                            objDetails.put("dispatch_gid", 0);
-                            objDetails.put("central_off_dispatch_gid", 0);
-                            SRarray.put(objDetails);
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }
-                JSONObject params_Json = new JSONObject();
-                try {
-                    params_Json.put("dispatch_data", Dispatcharray);
-                    params_Json.put("service_dtl", new JSONObject().put("SERVICE", SRarray));
-                    String a = "";
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-
-                if (params_Json.length() > 0) {
-                    String OutMessage = DispatchSet(params_Json);
-                }
-            }
-        });
-
-
-        final AlertDialog dialog = alert.create();
-
-        dialog.show();
-        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(false);
-        AWB_no.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                if (AWB_no.getText().toString().length() > 0 && txtpacket.getText().toString().length() > 0
-                        && edtweight.getText().toString().length() > 0 &&
-                        txtdate.getText().toString().length() > 0) {
-                    ((AlertDialog) dialog).getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(true);
-
-                } else {
-                    ((AlertDialog) dialog).getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(false);
-                }
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-
-            }
-        });
-        txtpacket.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                if (AWB_no.getText().toString().length() > 0 && txtpacket.getText().toString().length() > 0
-                        && edtweight.getText().toString().length() > 0 &&
-                        txtdate.getText().toString().length() > 0) {
-                    ((AlertDialog) dialog).getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(true);
-
-                } else {
-                    ((AlertDialog) dialog).getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(false);
-                }
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-
-            }
-        });
-        edtweight.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                if (AWB_no.getText().toString().length() > 0 && txtpacket.getText().toString().length() > 0
-                        && edtweight.getText().toString().length() > 0 &&
-                        txtdate.getText().toString().length() > 0) {
-                    ((AlertDialog) dialog).getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(true);
-
-                } else {
-                    ((AlertDialog) dialog).getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(false);
-                }
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-
-            }
-        });
-        txtdate.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                if (AWB_no.getText().toString().length() > 0 && txtpacket.getText().toString().length() > 0
-                        && edtweight.getText().toString().length() > 0 &&
-                        txtdate.getText().toString().length() > 0) {
-                    ((AlertDialog) dialog).getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(true);
-
-                } else {
-                    ((AlertDialog) dialog).getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(false);
-                }
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-
-            }
-        });
-    }
 
     private void initializeView() {
-
+        mode_items = new String[]{"Air", "Road", "Ship"};
+        send_items = new String[]{"Central office", "Branch office"};
+        serviceList = new ArrayList<>();
         sessiondata = new Bundle();
+        getdata = new GetData(getContext());
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(this.getActivity()));
-        serviceList = new ArrayList<Variables.ServiceSummary_List>();
+        customerSearch.setQueryHint("Search");
+
         reload.setOnClickListener(this);
+
         progressDialog = new ProgressDialog(getContext());
         progressDialog.setTitle(getResources().getString(R.string.loading));
         progressDialog.setCancelable(false);
-        Courier.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                int count = 0;
-                for (Variables.ServiceSummary_List productdtl : serviceList) {
-                    if (productdtl.isSelected()) {
-                        count = 1;
-                        break;
-                    }
-                }
-                if (count == 1) {
-                    forceopen();
 
-                } else {
-                    Toast.makeText(getActivity(), "Select Atleat One Product", Toast.LENGTH_LONG).show();
 
-                }
-            }
-        });
         customerSearch.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
@@ -441,6 +150,37 @@ public class ServiceSummaryFragment extends Fragment implements View.OnClickList
             public boolean onQueryTextChange(String newText) {
                 filter(newText);
                 return true;
+            }
+        });
+    }
+
+    @Override
+    public void setUserVisibleHint(boolean isVisibleToUser) {
+        super.setUserVisibleHint(isVisibleToUser);
+        if (isVisibleToUser && isResumed()) {
+            onResume();
+        }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (!getUserVisibleHint()) {
+            return;
+        }
+
+        DashBoardActivity mainActivity = (DashBoardActivity) getActivity();
+        mainActivity.fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                if (adapter.getSelectedList().size() > 0) {
+                    forceopen();
+
+                } else {
+                    Toast.makeText(getActivity(), "Select atleast one record", Toast.LENGTH_LONG).show();
+
+                }
             }
         });
     }
@@ -458,105 +198,192 @@ public class ServiceSummaryFragment extends Fragment implements View.OnClickList
             return;
         }
         progressDialog.show();
-        JSONObject Json = new JSONObject();
-        JSONObject params_Json = new JSONObject();
-        try {
-            params_Json.put("from_date", "");
-            params_Json.put("to_date", "");
-            params_Json.put("customer_gid", 0);
-            params_Json.put("product_gid", 0);
-            params_Json.put("service_gid", 0);
-            params_Json.put("status", "INITIATED");
-            Json.put("params", params_Json);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
 
-
-        String URL = Constant.URL + "Service_SummaryGetAPI?Emp_gid=" + UserDetails.getUser_id();
-
-        URL += "&Entity_gid=" + UserDetails.getEntity_gid();
-
-        CallbackHandler.sendReqest(getActivity(), Request.Method.POST, Json.toString(), URL, new VolleyCallback() {
-
+        serviceList = getdata.serviceSummaryList(1, new NetworkResult() {
             @Override
-            public void onSuccess(String result) {
-
-                try {
-                    JSONObject jsonObject = new JSONObject(result);
-                    String message = jsonObject.getString("MESSAGE");
-
-                    if (message.equals("FOUND")) {
-                        JSONArray jsonArray = jsonObject.getJSONArray("DATA");
-                        for (int i = 0; i < jsonArray.length(); i++) {
-                            JSONObject obj_json = jsonArray.getJSONObject(i);
-                            String display_name = obj_json.getString("customer_name");
-                            String product_name = obj_json.getString("product_name");
-                            String Date = obj_json.getString("service_date");
-                            int service_gid = obj_json.getInt("service_gid");
-                            int product_gid = obj_json.getInt("service_product_gid");
-                            String productslno, remark;
-                            if (obj_json.has("service_productslno")) {
-                                productslno = obj_json.getString("service_productslno");
-                            } else {
-                                productslno = "";
-                            }
-                            if (obj_json.has("remark")) {
-                                remark = obj_json.getString("remark");
-                            } else {
-                                remark = "";
-                            }
-                            String service_courierexp = obj_json.getString("service_courierexp");
-
-                            serviceList.add(new Variables.ServiceSummary_List(display_name, product_name,
-                                    Date, service_gid, product_gid, productslno, remark, service_courierexp));
-                        }
-
-                        setAdapter();
-                    } else {
-                        progressDialog.dismiss();
-                        empty_view.setText(getResources().getString(R.string.error_loading));
-                    }
-
-                } catch (JSONException e) {
-                    progressDialog.dismiss();
-                    e.printStackTrace();
-                }
-
-
+            public void handlerResult(String result) {
+                setAdapter();
             }
 
             @Override
-            public void onFailure(String result) {
-
-                Log.e("DirectSchecule", result);
+            public void handlerError(String result) {
+                progressDialog.dismiss();
             }
-
         });
-
-
     }
 
     public void setAdapter() {
 
         adapter = new ServiceSummryAdapter(getActivity(), serviceList);
         recyclerView.setAdapter(adapter);
-
-        progressDialog.dismiss();
         adapter.setOnclickListener(new ServiceSummryAdapter.OnItemClickListener() {
             @Override
-            public void onItemClick(Variables.ServiceSummary_List item, int position) {
+            public void onItemClick(Variables.ServiceSummary item, int position) {
 
             }
 
         });
 
         if (adapter.getItemCount() == 0) {
-            empty_view.setText("" + getActivity().getResources().getString(R.string.loading));
+            empty_view.setText("" + getActivity().getResources().getString(R.string.no_data_available));
             setVisibility(View.GONE, View.VISIBLE, View.GONE);
         } else {
             setVisibility(View.VISIBLE, View.GONE, View.GONE);
         }
+        progressDialog.dismiss();
+    }
+
+    private void forceopen() {
+        final LayoutInflater inflater = getLayoutInflater();
+        View alertLayout = inflater.inflate(R.layout.alert_courier, null);
+        AWB_no = alertLayout.findViewById(R.id.etxAWBillNo);
+        txtpacket = (EditText) alertLayout.findViewById(R.id.et_packets);
+        spnCourier = (Spinner) alertLayout.findViewById(R.id.spn_courier);
+        spnmode = (Spinner) alertLayout.findViewById(R.id.mode);
+        spnsendto = (Spinner) alertLayout.findViewById(R.id.sendto);
+        txtCourierDate = (TextView) alertLayout.findViewById(R.id.et_date);
+        txtCourierDate.setText(Common.convertDateString(new Date(), Constant.date_display_format));
+        edtweight = (EditText) alertLayout.findViewById(R.id.et_weight);
+
+
+        CustomSpinnerAdapter courierArrayAdapter = new CustomSpinnerAdapter(getActivity(), R.layout.spinner_item, courierList);
+        spnCourier.setAdapter(courierArrayAdapter);
+
+        ArrayAdapter<String> modeArrayAdapter = new ArrayAdapter<String>(getActivity(), R.layout.spinner_item, mode_items);
+        modeArrayAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
+        spnmode.setAdapter(modeArrayAdapter);
+
+        ArrayAdapter<String> sendtoArrayAdapter = new ArrayAdapter<String>(getActivity(), R.layout.spinner_item, send_items);
+        sendtoArrayAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
+        spnsendto.setAdapter(sendtoArrayAdapter);
+
+
+        txtCourierDate.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View view) {
+                final Calendar currentDate = Calendar.getInstance();
+                Variables.calendarDate c = new Variables.calendarDate(txtCourierDate.getText().toString());
+                DatePickerDialog datePickerDialog = new DatePickerDialog(getActivity(), datePickerListener, c.getYear(), c.getMonth(), c.getDayofmonth());
+                datePickerDialog.getDatePicker().setMaxDate(currentDate.getTimeInMillis());
+                datePickerDialog.setTitle("Choose Remark date");
+                datePickerDialog.show();
+            }
+        });
+
+        AlertDialog.Builder CourierBuilder = new AlertDialog.Builder(getActivity());
+        CourierBuilder.setTitle("Courier Details");
+        CourierBuilder.setView(alertLayout);
+
+
+        CourierBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+            }
+        });
+
+        CourierBuilder.setPositiveButton("Submit", new DialogInterface.OnClickListener() {
+
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+            }
+        });
+        AlertDialog courierDialog = CourierBuilder.create();
+        courierDialog.show();
+        CustomDialogListener a = new CustomDialogListener(courierDialog);
+        a.setClickListener(new presenter.CustomDialogListener() {
+            @Override
+            public void OnClickPositive(View view, AlertDialog dialog) {
+                int courier_gid = ((Variables.Details) spnCourier.getSelectedItem()).gid;
+                String courier_mode = spnmode.getSelectedItem().toString();
+                String courier_sentto = spnsendto.getSelectedItem().toString().equals(send_items[0]) ? "SEND TO CENTRAL OFFICE" : "SEND TO BRANCH OFFICE";
+                String courier_date = Common.convertDateString(txtCourierDate.getText().toString(), Constant.date_display_format, "yyyy-MM-dd");
+                String inOutFlag;
+                if (AWB_no.getText().toString().trim().length() == 0) {
+                    AWB_no.setError("*");
+                    return;
+                } else if (txtpacket.getText().toString().trim().length() == 0) {
+                    txtpacket.setError("*");
+                    return;
+                } else if (edtweight.getText().toString().trim().length() == 0) {
+                    edtweight.setError("*");
+                    return;
+                }
+                if (courier_mode.equals(mode_items[0])) {
+                    inOutFlag = "SERVICE_TOCENTRAL";
+                } else {
+                    inOutFlag = "SERVICE_TOBRANCH";
+                }
+                final JSONArray Dispatcharray = new JSONArray();
+                JSONObject dispatchobj = new JSONObject();
+
+                try {
+                    dispatchobj.put("courier_gid", courier_gid);
+                    dispatchobj.put("Dispatch_date", courier_date);
+                    dispatchobj.put("send_by", UserDetails.getUser_id());
+                    dispatchobj.put("awbno", AWB_no.getText().toString());
+                    dispatchobj.put("dispatch_mode", courier_mode);
+                    dispatchobj.put("dispatch_type", "Ndoc");
+                    dispatchobj.put("packets", txtpacket.getText().toString());
+                    dispatchobj.put("weight", edtweight.getText().toString());
+                    dispatchobj.put("dispatch_to", courier_sentto);
+                    dispatchobj.put("address", "");
+                    dispatchobj.put("city", "");
+                    dispatchobj.put("state", "");
+                    dispatchobj.put("pincode", "");
+                    dispatchobj.put("remark", "aaaaa");
+                    dispatchobj.put("returned", "N");
+                    dispatchobj.put("returned_on", "");
+                    dispatchobj.put("returned_remark", "");
+                    dispatchobj.put("pod", "");
+                    dispatchobj.put("pod_image", "");
+                    dispatchobj.put("isactive", "Y");
+                    dispatchobj.put("isremoved", "N");
+                    dispatchobj.put("dispatch_gid", 0);
+                    dispatchobj.put("action", "Insert");
+                    dispatchobj.put("type", "SERVICE");
+                    dispatchobj.put("in_out", inOutFlag);
+                    dispatchobj.put("status", courier_sentto);
+                    Dispatcharray.put(dispatchobj);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+                final JSONArray SRarray = new JSONArray();
+                for (Variables.ServiceSummary productdtl : adapter.getSelectedList()) {
+                    JSONObject objDetails = new JSONObject();
+
+                    if (productdtl.is_selected) {
+                        try {
+                            objDetails.put("product_gid", productdtl.product_gid);
+                            objDetails.put("product_slno", productdtl.product_Slno);
+                            objDetails.put("invoice_no", "");
+                            objDetails.put("remark", productdtl.service_remark);
+                            objDetails.put("service_gid", productdtl.service_gid);
+                            objDetails.put("dispatch_mode", "EXECUTIVE");
+                            objDetails.put("pay_by", productdtl.service_courierexp);
+                            objDetails.put("dispatch_gid", 0);
+                            objDetails.put("central_off_dispatch_gid", 0);
+                            SRarray.put(objDetails);
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+                JSONObject params_Json = new JSONObject();
+                try {
+                    params_Json.put("dispatch_data", Dispatcharray);
+                    params_Json.put("service_dtl", new JSONObject().put("SERVICE", SRarray));
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+                DispatchSet(params_Json.toString(), dialog);
+
+            }
+        });
     }
 
     public void setVisibility(int recycleView, int emptyView, int reloadView) {
@@ -570,11 +397,11 @@ public class ServiceSummaryFragment extends Fragment implements View.OnClickList
 
     }
 
-    public String DispatchSet(JSONObject jsonObject) {
+    public void DispatchSet(String jsonObject, final AlertDialog dialog) {
         progressDialog.show();
         String URL = Constant.URL + "Dispatch_set_API?Emp_gid=" + UserDetails.getUser_id() + "&Entity_gid=1";
 
-        CallbackHandler.sendReqest(getActivity(), Request.Method.POST, jsonObject.toString(), URL, new VolleyCallback() {
+        CallbackHandler.sendReqest(getActivity(), Request.Method.POST, jsonObject, URL, new VolleyCallback() {
             @Override
             public void onSuccess(String result) {
                 try {
@@ -582,9 +409,15 @@ public class ServiceSummaryFragment extends Fragment implements View.OnClickList
                     String message = json.getString("MESSAGE");
                     if (message.equals("SUCCESS")) {
                         Toast.makeText(getContext(), "Dispatched Successfully", Toast.LENGTH_LONG).show();
-                        serviceList.clear();
-                        loadData();
-
+                        List<Variables.ServiceSummary> temp = adapter.getSelectedList();
+                        for (int i = 0; i < temp.size(); i++) {
+                            if (temp.get(i).is_selected)
+                                serviceList.remove(temp.get(i));
+                        }
+                        adapter.clearSelectedList();
+                        adapter.updateList(serviceList);
+                        dialog.dismiss();
+//loaddata
                     }
                 } catch (Exception e) {
                 }
@@ -598,13 +431,12 @@ public class ServiceSummaryFragment extends Fragment implements View.OnClickList
                 progressDialog.dismiss();
             }
         });
-
-        return "";
     }
 
-    public String Couriername() {
+    public void Couriername() {
         progressDialog.show();
-        String URL = Constant.URL + "CourierName_get?Emp_gid=" + UserDetails.getUser_id() + "&Entity_gid=1";
+        courierList = new ArrayList<>();
+        String URL = Constant.URL + "CourierName_get?Emp_gid=" + UserDetails.getUser_id() + "&Entity_gid=" + UserDetails.getEntity_gid();
         JSONObject Json = new JSONObject();
         JSONObject params_Json = new JSONObject();
         try {
@@ -624,11 +456,10 @@ public class ServiceSummaryFragment extends Fragment implements View.OnClickList
                         JSONArray jsonArray = jsonObject.getJSONArray("DATA");
                         for (int i = 0; i < jsonArray.length(); i++) {
                             JSONObject obj_json = jsonArray.getJSONObject(i);
-                            String courier_name = obj_json.getString("courier_name");
-                            int courier_gid = obj_json.getInt("courier_gid");
-                            courierList.add(new Variables.Courier(courier_gid, courier_name));
-                            Log.e("Courier", result);
-
+                            Variables.Details details = new Variables.Details();
+                            details.data = obj_json.getString("courier_name");
+                            details.gid = obj_json.getInt("courier_gid");
+                            courierList.add(details);
                         }
                     }
                     progressDialog.dismiss();
@@ -643,16 +474,14 @@ public class ServiceSummaryFragment extends Fragment implements View.OnClickList
                 progressDialog.dismiss();
             }
         });
-
-        return "";
     }
 
     public void filter(String text) {
-        List<Variables.ServiceSummary_List> temp = new ArrayList();
+        List<Variables.ServiceSummary> temp = new ArrayList();
         if (serviceList.size() > 0) {
-            for (Variables.ServiceSummary_List d : serviceList) {
+            for (Variables.ServiceSummary d : serviceList) {
 
-                if (d.getCustomername().toLowerCase().replaceAll("\\s+", "").contains(text.toLowerCase().replaceAll("\\s+", ""))) {
+                if (d.customer_name.toLowerCase().replaceAll("\\s+", "").contains(text.toLowerCase().replaceAll("\\s+", ""))) {
                     temp.add(d);
                 }
             }
@@ -661,4 +490,37 @@ public class ServiceSummaryFragment extends Fragment implements View.OnClickList
 
 
     }
+
+    @Override
+    public void onDestroyView() {
+        DashBoardActivity mainActivity = (DashBoardActivity) getActivity();
+        mainActivity.fab.hide();
+        super.onDestroyView();
+    }
+/*private DatePickerDialog.OnDateSetListener setDatepicker() {
+        DatePickerDialog.OnDateSetListener onDateSetListener = new DatePickerDialog.OnDateSetListener() {
+
+            @Override
+            public void onDateSet(DatePicker view, int year, int monthOfYear,
+                                  int dayOfMonth) {
+                int tag = ((Integer) view.getTag());
+
+                if (tag == R.id.txtSRFDate) {
+                    fDate.setText(dayOfMonth + "/" + monthOfYear + "/" + year);
+                } else if (tag == R.id.txtSRTDate) {
+                    tDate.setText(dayOfMonth + "/" + monthOfYear + "/" + year);
+                } else if (tag == R.id.txtSRFollowupFDate) {
+                    followup_fDate.setText(dayOfMonth + "/" + monthOfYear + "/" + year);
+                } else if (tag == R.id.txtSRFollowupTDate) {
+                    followup_tDate.setText(dayOfMonth + "/" + monthOfYear + "/" + year);
+                } else if (tag == R.id.txtSRRescheduleFDate) {
+                    reschedule_fDate.setText(dayOfMonth + "/" + monthOfYear + "/" + year);
+                } else if (tag == R.id.txtSRRescheduleTDate) {
+                    reschedule_tDate.setText(dayOfMonth + "/" + monthOfYear + "/" + year);
+                }
+            }
+
+        };
+        return onDateSetListener;
+    }*/
 }

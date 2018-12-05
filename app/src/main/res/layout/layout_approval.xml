@@ -52,7 +52,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_below="@id/txtEmployeeName"
-                android:layout_marginTop="5dp"
+                android:layout_margin="5dp"
+                android:gravity="center|right"
                 android:orientation="horizontal">
 
                 <TextView
@@ -61,7 +62,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:drawableLeft="@drawable/ic_action_list"
+                    android:drawableLeft="@drawable/ic_action_shopping_cart_20dp"
                     android:gravity="center|left"
                     android:text="View Sales"
                     android:tooltipText="Comment" />
@@ -72,10 +73,10 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:drawableLeft="@drawable/ic_action_list"
+                    android:drawableLeft="@drawable/ic_action_outstanding_20dp"
                     android:gravity="center|left"
                     android:text="Outstanding"
-                    android:tooltipText="Comment" />
+                    android:tooltipText="Outstanding" />
 
                 <TextView
                     android:id="@+id/txtCustViewpdc"
@@ -83,7 +84,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:drawableLeft="@drawable/ic_action_list"
+                    android:drawableLeft="@drawable/ic_action_cheque_20dp"
                     android:gravity="center|left"
                     android:text="View PDC"
                     android:tooltipText="Comment" />

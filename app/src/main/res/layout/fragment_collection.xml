@@ -1,0 +1,199 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_margin="@dimen/brv_margin"
+    android:orientation="vertical"
+    tools:context="view.fragment.Collection">
+
+    <TextView
+        style="@style/SecondaryText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Mode of payment" />
+
+    <Spinner
+        android:id="@+id/spnCModeofPay"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:theme="@style/ButtonTheme"></Spinner>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <EditText
+            android:id="@+id/etxCAmount"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:drawableRight="@drawable/ic_action_rupee"
+            android:hint="Amount"
+            android:imeOptions="actionDone"
+            android:theme="@style/ButtonTheme" />
+
+        <LinearLayout
+            android:id="@+id/linearCheque"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                style="@style/PrimaryTextHilight"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Check Details" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    style="@style/SecondaryText"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight=".3"
+                    android:gravity="center|left"
+                    android:text="Bank :" />
+
+                <Spinner
+                    android:id="@+id/spnCCBank"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight=".7"
+                    android:spinnerMode="dropdown"
+                    android:theme="@style/ButtonTheme" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    style="@style/SecondaryText"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight=".3"
+                    android:gravity="center|left"
+                    android:text="Date :" />
+
+                <TextView
+                    android:id="@+id/txtCCDate"
+                    style="@style/SecondaryTextHilight"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="center|left"
+                    android:layout_margin="5dp"
+                    android:layout_weight=".7"
+                    android:drawableRight="@drawable/ic_action_date"
+                    android:singleLine="true"
+                    android:text="@string/choose_date" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    style="@style/SecondaryText"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight=".3"
+                    android:gravity="center|left"
+                    android:text="Number :" />
+
+                <EditText
+                    android:id="@+id/etxCCNumber"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight=".7"
+                    android:drawableRight="@drawable/ic_action_keyboard"
+                    android:hint="Check Number"
+                    android:imeOptions="actionNext"
+                    android:inputType="number"
+                    android:maxLength="6"
+                    android:theme="@style/ButtonTheme" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    style="@style/SecondaryText"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight=".3"
+                    android:gravity="center|left"
+                    android:text="Amount :" />
+
+                <EditText
+                    android:id="@+id/etxCCAmount"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight=".7"
+                    android:drawableRight="@drawable/ic_action_rupee"
+                    android:hint="Check Amount"
+                    android:imeOptions="actionDone"
+                    android:inputType="number"
+                    android:maxLength="8"
+                    android:theme="@style/ButtonTheme" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <CheckBox
+                    android:id="@+id/cbxCCIsMultiple"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="IS Multiple"
+                    android:theme="@style/ButtonTheme" />
+
+                <Button
+                    android:id="@+id/btnCCAdd"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.3"
+                    android:background="@color/colorAccent"
+                    android:text="Add"
+                    android:theme="@style/ButtonTheme"
+                    android:visibility="visible" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+
+                <ScrollView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+                    <!--Collection Check List-->
+                    <TableLayout
+                        android:id="@+id/tbl_layout_CCList"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                    </TableLayout>
+                </ScrollView>
+            </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
+
+
+</LinearLayout>

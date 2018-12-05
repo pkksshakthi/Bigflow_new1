@@ -10,4 +10,5 @@
 
     <!--Base Recyclerview-->
     <dimen name="brv_margin">3dp</dimen>
+    <dimen name="dialog_margin">5dp</dimen>
 </resources>

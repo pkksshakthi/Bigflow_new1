@@ -11,7 +11,7 @@ import android.view.ViewGroup;
 
 import com.vsolv.bigflow.R;
 
-public class Sales_others extends Fragment {
+public class OtherFragment extends Fragment {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -23,7 +23,7 @@ public class Sales_others extends Fragment {
 
     private ProspectFragment.OnFragmentInteractionListener mListener;
 
-    public Sales_others() {
+    public OtherFragment() {
 
     }
 
@@ -49,9 +49,22 @@ public class Sales_others extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        View rootView = inflater.inflate(R.layout.fragment_other, container, false);
+        loadView(rootView);
+        initializeView();
+        loadData();
+        return rootView;
+    }
 
+    private void loadView(View view) {
 
-        return inflater.inflate(R.layout.fragment_sales_others, container, false);
+    }
+
+    private void initializeView() {
+
+    }
+
+    private void loadData() {
 
     }
 

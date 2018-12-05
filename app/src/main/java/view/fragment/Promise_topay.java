@@ -30,7 +30,7 @@ import view.activity.DashBoardActivity;
 
 import static java.lang.Integer.parseInt;
 
-public class Promise_topay extends Fragment implements View.OnClickListener{
+public class Promise_topay extends Fragment implements View.OnClickListener {
     Button Pay_submit;
     EditText txtDate, amounttxt;
     private int mYear, mMonth, mDay;
@@ -67,6 +67,7 @@ public class Promise_topay extends Fragment implements View.OnClickListener{
         txtDate.setOnClickListener(this);
         Pay_submit.setOnClickListener(this);
     }
+
     @Override
     public void onClick(View view) {
         if (view == txtDate) {
@@ -80,12 +81,12 @@ public class Promise_topay extends Fragment implements View.OnClickListener{
             datePickerDialog.setCancelable(false);
             datePickerDialog.setTitle("Choose Remark date");
             datePickerDialog.show();
-        }else if (view == Pay_submit){
-            if (pay_date != null ) {
+        } else if (view == Pay_submit) {
+            if (pay_date != null) {
                 if (getActivity().getIntent() != null) {
                     customer_details = getActivity().getIntent().getExtras();
-                    customer_gid = customer_details.getInt("customer_id");
-                    schedule_type_gid = customer_details.getInt("scheduletype_id");
+                    customer_gid = customer_details.getInt(Constant.key_customer_gid,0);
+                    schedule_type_gid = customer_details.getInt(Constant.key_sch_type_gid,0);
                 }
 
                 JSONObject json = new JSONObject();
@@ -114,12 +115,11 @@ public class Promise_topay extends Fragment implements View.OnClickListener{
                     @Override
                     public void onSuccess(String result) {
 
-                        if (("\""+"SUCCESS"+"\"").equals(result)) {
-                            Toast.makeText(getActivity(), "P2P saved", Toast.LENGTH_LONG).show();
-                            startActivity(new Intent(getActivity(), DashBoardActivity.class));
-
+                        if (("\"" + "SUCCESS" + "\"").equals(result)) {
+                            Toast.makeText(getActivity(), "Saved successfully.!", Toast.LENGTH_LONG).show();
+                            getActivity().finish();
                         } else {
-                            Toast.makeText(getActivity(), "Unsuccessful", Toast.LENGTH_LONG).show();
+                            Toast.makeText(getActivity(), "Not saved successfully.!", Toast.LENGTH_LONG).show();
                         }
                     }
 
@@ -132,7 +132,7 @@ public class Promise_topay extends Fragment implements View.OnClickListener{
 
                 });
 
-            }else{
+            } else {
 
                 Toast.makeText(getActivity(), "Enter Valid Date", Toast.LENGTH_LONG).show();
 

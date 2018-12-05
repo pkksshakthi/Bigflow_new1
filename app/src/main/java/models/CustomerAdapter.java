@@ -17,11 +17,12 @@ public class CustomerAdapter extends RecyclerView.Adapter<CustomerAdapter.Custom
     private Context mCtx;
     private List<Variables.Customer> customerList;
     private OnItemClickListener mListener;
+    private boolean is_in_action;
 
     public interface OnItemClickListener {
-        void onItemClick(Variables.Customer item, int position);
+        void onItemClick(View view, Variables.Customer item, int position);
 
-        void onItemLongClick(Variables.Customer item, int position);
+        void onItemLongClick(View view, Variables.Customer item, int position);
 
         void onViewDetailsClick(Variables.Customer item, int position);
 
@@ -50,7 +51,7 @@ public class CustomerAdapter extends RecyclerView.Adapter<CustomerAdapter.Custom
                     if (listener != null) {
                         int position = getAdapterPosition();
                         if (position != RecyclerView.NO_POSITION) {
-                            listener.onItemClick(getitem(position), position);
+                            listener.onItemClick(v, getitem(position), position);
                         }
                     }
 
@@ -62,7 +63,7 @@ public class CustomerAdapter extends RecyclerView.Adapter<CustomerAdapter.Custom
                     if (listener != null) {
                         int position = getAdapterPosition();
                         if (position != RecyclerView.NO_POSITION) {
-                            listener.onItemLongClick(getitem(position), position);
+                            listener.onItemLongClick(v, getitem(position), position);
                         }
                     }
                     return true;
@@ -124,9 +125,13 @@ public class CustomerAdapter extends RecyclerView.Adapter<CustomerAdapter.Custom
 
         Variables.Customer customer = customerList.get(position);
 
-        holder.customerName.setText(customer.customer_name);
-        holder.locationName.setText(customer.customer_location);
+        holder.customerName.setText(customer.customer_name.toUpperCase());
+        holder.locationName.setText(customer.customer_location.toUpperCase());
         holder.txtCustViewDetails.setText(" Details");
+        if (!is_in_action) {
+            holder.customerName.setCompoundDrawablesWithIntrinsicBounds(null, null, null, null);
+            //holder.customerName.setCompoundDrawablesWithIntrinsicBounds(null, null, mCtx.getResources().getDrawable(R.drawable.ic_action_check), null);
+        }
     }
 
     @Override
@@ -141,5 +146,13 @@ public class CustomerAdapter extends RecyclerView.Adapter<CustomerAdapter.Custom
 
     public Variables.Customer getitem(int position) {
         return customerList.get(position);
+    }
+
+    public void setAction(boolean action) {
+        is_in_action = action;
+    }
+
+    public boolean getAction() {
+        return is_in_action;
     }
 }

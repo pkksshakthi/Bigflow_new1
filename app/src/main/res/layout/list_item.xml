@@ -7,9 +7,8 @@
     <TextView
         android:id="@+id/txtList_item"
         style="@style/ListItemText"
-        android:padding="2dp"
         android:gravity="center|left"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="?android:attr/listPreferredItemHeightSmall"
         android:text="Item" />
 </LinearLayout>

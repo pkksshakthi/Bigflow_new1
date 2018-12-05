@@ -35,6 +35,10 @@ public class Common {
         return str;
     }
 
+    public static String convertDateString(String date, String dateFormat, String convertedDateFormat) {
+        Date date1 = convertDate(date, dateFormat);
+        return convertDateString(date1, convertedDateFormat);
+    }
 
     //General function
     public static boolean isOnline(Context context) {
@@ -82,21 +86,30 @@ public class Common {
     }
 
     public static class InputFilterMinMax implements InputFilter {
-        private int min, max;        public InputFilterMinMax(int min, int max) {
+        private int min, max;
+
+        public InputFilterMinMax(int min, int max) {
             this.min = min;
             this.max = max;
-        }        public InputFilterMinMax(String min, String max) {
+        }
+
+        public InputFilterMinMax(String min, String max) {
             this.min = Integer.parseInt(min);
             this.max = Integer.parseInt(max);
-        }        @Override
+        }
+
+        @Override
         public CharSequence filter(CharSequence source, int start, int end, Spanned dest, int dstart, int dend) {
             try {
                 int input = Integer.parseInt(dest.toString() + source.toString());
                 if (isInRange(min, max, input))
                     return null;
-            } catch (NumberFormatException nfe) {            }
-            return"";
-        }        private boolean isInRange(int a, int b, int c) {
+            } catch (NumberFormatException nfe) {
+            }
+            return "";
+        }
+
+        private boolean isInRange(int a, int b, int c) {
             return b > a ? c >= a && c <= b : c >= b && c <= a;
         }
     }

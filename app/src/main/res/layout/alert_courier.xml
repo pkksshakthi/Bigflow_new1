@@ -1,11 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-
-    android:orientation="vertical"
-    android:padding="15dp">
+    android:layout_margin="@dimen/dialog_margin"
+    android:orientation="vertical">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -14,19 +12,21 @@
         android:orientation="horizontal">
 
         <TextView
+            style="@style/SecondaryText"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_weight=".3"
+            android:gravity="center|left"
             android:text="Courier Name:" />
 
         <Spinner
             android:id="@+id/spn_courier"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_weight=".7"
-            android:background="@android:drawable/btn_dropdown"
-            android:singleLine="true"
-            android:spinnerMode="dialog" />
+            android:padding="5dp"
+            android:spinnerMode="dropdown"
+            android:theme="@style/ButtonTheme" />
 
     </LinearLayout>
 
@@ -37,22 +37,24 @@
         android:orientation="horizontal">
 
         <TextView
+            style="@style/SecondaryText"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_weight=".3"
+            android:gravity="center|left"
             android:text="Date :" />
 
-        <EditText
+        <TextView
             android:id="@+id/et_date"
+            style="@style/SecondaryTextHilight"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_gravity="center|left"
+            android:layout_margin="5dp"
             android:layout_weight=".7"
-            android:clickable="true"
-            android:focusable="false"
-            android:hint="Date"
-            android:imeOptions="actionDone"
-            android:inputType="date"
-            android:singleLine="true" />
+            android:drawableRight="@drawable/ic_action_date"
+            android:singleLine="true"
+            android:text="Courier Date" />
     </LinearLayout>
 
 
@@ -63,20 +65,23 @@
         android:orientation="horizontal">
 
         <TextView
+            style="@style/SecondaryText"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_weight=".3"
+            android:gravity="center|left"
             android:text="AWB No:" />
 
         <EditText
-            android:id="@+id/et_AWB"
+            android:id="@+id/etxAWBillNo"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_weight=".7"
-            android:imeOptions="actionDone"
-            android:maxLength="16"
             android:digits="abcdefghijklmnopqrstuvwxyz1234567890 "
-            android:singleLine="true" />
+            android:imeOptions="actionNext"
+            android:maxLength="16"
+            android:singleLine="true"
+            android:theme="@style/ButtonTheme" />
     </LinearLayout>
 
     <LinearLayout
@@ -86,19 +91,20 @@
         android:orientation="horizontal">
 
         <TextView
+            style="@style/SecondaryText"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_weight=".3"
+            android:gravity="center|left"
             android:text="Mode :" />
 
         <Spinner
             android:id="@+id/mode"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_weight=".7"
-            android:background="@android:drawable/btn_dropdown"
-            android:singleLine="true"
-            android:spinnerMode="dialog" />
+            android:spinnerMode="dropdown"
+            android:theme="@style/ButtonTheme" />
     </LinearLayout>
 
     <LinearLayout
@@ -108,21 +114,23 @@
         android:orientation="horizontal">
 
         <TextView
+            style="@style/SecondaryText"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_weight=".3"
+            android:gravity="center|left"
             android:text="Packets :" />
 
         <EditText
             android:id="@+id/et_packets"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_weight=".7"
-            android:imeOptions="actionDone"
+            android:imeOptions="actionNext"
             android:inputType="number"
             android:maxLength="8"
-
-            android:singleLine="true" />
+            android:singleLine="true"
+            android:theme="@style/ButtonTheme" />
     </LinearLayout>
 
     <LinearLayout
@@ -132,21 +140,23 @@
         android:orientation="horizontal">
 
         <TextView
+            style="@style/SecondaryText"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_weight=".3"
+            android:gravity="center|left"
             android:text="Weight :" />
 
         <EditText
             android:id="@+id/et_weight"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_weight=".7"
-            android:maxLength="6"
-
             android:imeOptions="actionDone"
             android:inputType="numberDecimal"
-            android:singleLine="true" />
+            android:maxLength="6"
+            android:singleLine="true"
+            android:theme="@style/ButtonTheme" />
     </LinearLayout>
 
     <LinearLayout
@@ -156,19 +166,20 @@
         android:orientation="horizontal">
 
         <TextView
+            style="@style/SecondaryText"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_weight=".3"
+            android:gravity="center|left"
             android:text="Send To :" />
 
         <Spinner
             android:id="@+id/sendto"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_weight=".7"
-            android:background="@android:drawable/btn_dropdown"
-            android:singleLine="true"
-            android:spinnerMode="dialog" />
+            android:spinnerMode="dropdown"
+            android:theme="@style/ButtonTheme" />
     </LinearLayout>
 
 

@@ -48,7 +48,7 @@ public class EmployeeTrackingAdapter extends RecyclerView.Adapter<EmployeeTracki
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Variables.Employee employee = mEmployeeList.get(position);
 
-        holder.employeeName.setText(employee.employee_name);
+        holder.employeeName.setText(employee.employee_name.toUpperCase());
 
     }
 

@@ -126,8 +126,10 @@ public class CustomerFilterAdapter extends RecyclerView.Adapter<RecyclerView.Vie
             CustomerViewHolder itemViewholder = (CustomerViewHolder) holder;
             Variables.Customer customer = (Variables.Customer) customerList.get(position);
 
-            itemViewholder.customerName.setText(customer.customer_name);
-            if (customer.customer_sch_status.equals("OPEND")) {
+            itemViewholder.customerName.setText(customer.customer_name.toUpperCase());
+            if (customer.customer_sch_status == null) {
+                itemViewholder.customerName.setTextColor(mCtx.getResources().getColor(R.color.TextPrimary));
+            } else if (customer.customer_sch_status.equals("OPEND")) {
                 itemViewholder.customerName.setTextColor(mCtx.getResources().getColor(R.color.success));
             } else if (customer.customer_sch_status.equals("CLOSED")) {
                 itemViewholder.customerName.setTextColor(mCtx.getResources().getColor(R.color.error));
@@ -135,7 +137,7 @@ public class CustomerFilterAdapter extends RecyclerView.Adapter<RecyclerView.Vie
                 itemViewholder.customerName.setTextColor(mCtx.getResources().getColor(R.color.TextPrimary));
             }
 
-            itemViewholder.locationName.setText(customer.customer_location);
+            itemViewholder.locationName.setText(customer.customer_location.toUpperCase());
             itemViewholder.txtCustViewDetails.setText(" Details");
         }
 

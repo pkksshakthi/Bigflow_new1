@@ -1,20 +1,21 @@
 package view.activity;
 
 import android.app.Activity;
-import android.app.ProgressDialog;
+import android.app.AlertDialog;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
-import android.database.sqlite.SQLiteDatabase;
+import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
-
 
 import com.android.volley.Request;
 import com.vsolv.bigflow.R;
@@ -23,20 +24,17 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
-import java.util.concurrent.ExecutionException;
-
 
 import DataBase.DataBaseHandler;
+import DataBase.GetData;
 import constant.Constant;
 import models.Common;
 import models.UserDetails;
-import models.UserMenu;
-import models.Variables;
 import network.CallbackHandler;
+import network.DeviceInfo;
+import presenter.NetworkResult;
 import presenter.UserSessionManager;
 import presenter.VolleyCallback;
 
@@ -45,6 +43,10 @@ public class LoginActivity extends Activity {
     EditText loginUserName, loginPassword;
     Integer errorCode;
     UserSessionManager session;
+    String DeviceProcess;
+    private JSONObject jsonObjectVersionCheck;
+    private String out_message;
+    private GetData getData;
     // private Prog
 
     @Override
@@ -83,6 +85,16 @@ public class LoginActivity extends Activity {
         loginButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
+//                try {
+//                    Integer  currentVersion = getPackageManager().getPackageInfo(getPackageName(), 0).versionCode;
+//                    Integer dd = currentVersion;
+//                } catch (PackageManager.NameNotFoundException e) {
+//                    e.printStackTrace();
+//                }
+//                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id="+"com.vsolv.bigflow")));
+
+                // Ends
                 setVisibility(View.GONE, View.VISIBLE);
                 String userName = loginUserName.getText().toString();
                 String password = loginPassword.getText().toString();
@@ -132,8 +144,22 @@ public class LoginActivity extends Activity {
                     JSONObject jsonObject = new JSONObject(result);
                     String status = jsonObject.getString("MESSAGE");
                     if (status.equals("SUCCESS")) {
-                        loadData(jsonObject.getJSONObject("DATA"));
+
+                        if (checkconnection() == 102) {
+                             DeviceProcess = "Login";
+                        } else {
+                            DeviceProcess = "APP Launch";
+                        }
+
+                         loadData(jsonObject.getJSONObject("DATA"));
                         session.createUserLoginSession(user_id, user_password, UserDetails.getToday_date(), jsonObject.getJSONObject("DATA").toString());
+
+                        // Get Device Details
+                        Intent intent = new Intent(android.provider.Settings.ACTION_SETTINGS);
+                        DeviceInfo di = new DeviceInfo();
+
+                        String OutMessage = di.getDeviceinfo(LoginActivity.this,intent,DeviceProcess);
+                        // Device Details Ends
 
                     } else {
 
@@ -164,7 +190,13 @@ public class LoginActivity extends Activity {
         UserDetails.setUser_name(jsonObject.getString("employee_name"));
         UserDetails.setEntity_gid(jsonObject.getInt("entity_gid"));
         if (isOnline(getApplicationContext())) {
-            loadMenu(jsonObject);
+            // Version Check
+            String message = null;
+//            final String out_message =  CheckAPPVersion(LoginActivity.this);
+              CheckAPPVersion(LoginActivity.this,jsonObject);
+
+
+//            loadMenu(jsonObject);
         } else {
             startActivity(new Intent(getApplicationContext(), DashBoardActivity.class));
             finish();
@@ -215,7 +247,7 @@ public class LoginActivity extends Activity {
 
 
                     } else {
-                        Toast.makeText(getApplicationContext(), "Unsuccessful", Toast.LENGTH_LONG).show();
+                        Toast.makeText(getApplicationContext(), "Menu Unsuccessful", Toast.LENGTH_LONG).show();
                     }
                 } catch (JSONException e) {
                     Log.e("Login", e.getMessage());
@@ -272,6 +304,117 @@ public class LoginActivity extends Activity {
             }
         }
         return 0;
+    }
+
+    public void CheckAPPVersion(Context context, final JSONObject jsonObject){
+
+        try {
+            getData = new GetData(context);
+
+             getData.getVersionInfo("ANDROID_MOBILE", new NetworkResult() {
+                Integer latestVersion_Code;
+                Integer currentVersion_Code;
+                String message;
+
+                @Override
+                public String handlerResult(String result) {
+
+                    try {
+                        JSONObject jsonObject = new JSONObject(result);
+
+                    String status = jsonObject.getString("MESSAGE");
+                    if (status.equals("FOUND")) {
+                        JSONArray jsonArray;
+                        jsonArray = jsonObject.getJSONArray("DATA");
+                        JSONObject obj_json = jsonArray.getJSONObject(0);
+                        jsonObjectVersionCheck = obj_json;
+                    }else {
+                        out_message = "ERROR";
+                        Toast.makeText(getApplicationContext(), "No Data For APP Validation.", Toast.LENGTH_LONG).show();
+                        return "" ;
+                    }
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+
+                    if (jsonObjectVersionCheck.length() > 0 ) {
+                        try{
+                            latestVersion_Code =  jsonObjectVersionCheck.getInt("version_no");
+                            latestVersion_Code = latestVersion_Code + 1; /// for Testing
+                        } catch (JSONException e){
+
+                        }
+                        // Get the Current Version Code
+                        try {
+                             currentVersion_Code = getPackageManager().getPackageInfo(getPackageName(), 0).versionCode;
+
+                        } catch (PackageManager.NameNotFoundException e) {
+                            e.printStackTrace();
+                        }
+
+                        if (latestVersion_Code > currentVersion_Code) {
+                            out_message = "UPDATE";
+                            // Get Confirm from User
+                            final AlertDialog.Builder builder = new AlertDialog.Builder(LoginActivity.this);
+                            builder.setTitle("Action Required");
+                            if (out_message == "UPDATE"){
+                                message = "Update Version Of a APP Is Available.Kindly Update.";
+                            }else if (out_message == "ERROR"){
+                                message = "Error Occured.Contact Admin.";
+                            }else {
+                                message = "Error Occured.Contact Admin.";
+                                setVisibility(View.VISIBLE, View.GONE);
+                            }
+
+                            builder.setMessage(message);
+                            builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    if (out_message == "UPDATE"){
+                                        // To Call The Playstore
+                                        startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id="+"com.vsolv.bigflow")));
+                                    }else {
+                                        dialog.dismiss();
+                                    }
+
+                                }
+
+                            });
+                            builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    dialog.dismiss();
+                                }
+                            });
+                            builder.show();
+
+                        }   else {
+                            out_message = "SUCCESS";
+                            loadMenu(jsonObject);
+
+                            if (!out_message.equals("SUCCESS")){
+
+                            }
+                            // version check Ends
+                        }
+
+                    } else {
+                        out_message = "ERROR";
+                    }
+
+                    return out_message;
+                }
+                @Override
+                public void handlerError(String result) {
+                    Toast.makeText(getApplicationContext(), "Error On App Validation", Toast.LENGTH_LONG).show();
+                }
+            });
+        } catch (Exception e){
+
+        }
+
+
     }
 
 }

@@ -136,13 +136,16 @@ public class CommentActivity extends AppCompatActivity implements View.OnClickLi
     @Override
     public void onClick(View v) {
         if (v.getId() == R.id.ibtnChatSent) {
+            if (etxMessage.getText().toString().trim().length() == 0) {
+                return;
+            }
             getData.SetComment(customer_gid, new Date(), etxMessage.getText().toString(), new NetworkResult() {
                 @Override
                 public void handlerResult(String result) {
                     Variables.Comment comment = new Variables.Comment();
                     comment.employee_gid = UserDetails.getUser_id();
                     comment.employee_name = UserDetails.getUser_name();
-                    comment.comment_date = Common.convertDateString(new Date(), "yyyy/MM/dd hh:mm:ss");
+                    comment.comment_date = Common.convertDateString(new Date(), "yyyy/MM/dd hh:mm");
                     comment.comment_message = etxMessage.getText().toString();
                     comment.comment_gid = 0;
                     commentAdapter.addCommentDetails(comment);

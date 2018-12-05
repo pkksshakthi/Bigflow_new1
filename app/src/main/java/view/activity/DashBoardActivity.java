@@ -15,7 +15,6 @@ import android.os.SystemClock;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
@@ -47,7 +46,9 @@ import models.CustomExpandableListAdapter;
 import models.ExpandableListDataSource;
 import models.LocationSync;
 import models.UserDetails;
+import models.Variables;
 import network.ConnectivityReceiver;
+import network.DeviceInfo;
 import network.LocationService;
 import presenter.UserSessionManager;
 import view.fragment.AboutFragment;
@@ -55,11 +56,11 @@ import view.fragment.AddScheduleFragment;
 import view.fragment.Approval_Fragment;
 import view.fragment.DayScheduleFragment;
 import view.fragment.DirctScheduleFragment;
-import view.fragment.EmpAchievementFragment;
 import view.fragment.EmployeeTrackingFragment;
 import view.fragment.ProfileFragment;
 import view.fragment.ProspectFragment;
 import view.fragment.RouteSummaryFragment;
+import view.fragment.SalesPlanning;
 import view.fragment.ServiceSummaryFragment;
 import view.fragment.StatusReviewFragment;
 import view.fragment.SynchronizeFragment;
@@ -74,6 +75,7 @@ public class DashBoardActivity extends AppCompatActivity {
     TextView nav_header_title, nav_header_subtitle;
     ImageView nav_profile;
     IntentFilter mIntentFilter;
+    public FloatingActionButton fab;
     ConnectivityReceiver connectivityReceiver;
     private Boolean isOffline = false;
 
@@ -84,8 +86,9 @@ public class DashBoardActivity extends AppCompatActivity {
     private DrawerLayout drawer;
     private Toolbar toolbar;
     private PendingIntent pendingIntent;
-    private AlarmManager manager;
+    IntentFilter intentfilter;
 
+    // DeviceInfo deviceInfo;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -94,20 +97,23 @@ public class DashBoardActivity extends AppCompatActivity {
         initializeView();
         loadData();
         checkLocationPermission();
+//        intentfilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
+//        DashBoardActivity.this.registerReceiver(deviceInfo,intentfilter);
         //update this in dashboardactivity below oncreate method
         try {
             int interval = 3000;
-            manager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+            AlarmManager manager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
             Intent alarmIntent = new Intent(DashBoardActivity.this, ConnectivityReceiver.class);
             alarmIntent.setAction("restarting.services");
             pendingIntent = PendingIntent.getBroadcast(DashBoardActivity.this, 0, alarmIntent, 0);
+
             manager.setRepeating(AlarmManager.RTC_WAKEUP, SystemClock.elapsedRealtime(), 1000 * 60 * 2, pendingIntent);
+
             manager.setInexactRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), interval, pendingIntent);
 
         } catch (Exception e) {
-
-            
         }
+
         connectivityReceiver.setConnectivityReceiver(new ConnectivityReceiver.ConnectivityReceiverListener() {
             @Override
             public void onNetworkConnectionChanged(boolean isConnected) {
@@ -139,6 +145,7 @@ public class DashBoardActivity extends AppCompatActivity {
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         mExpandableListView = findViewById(R.id.navList);
         drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        fab = (FloatingActionButton) findViewById(R.id.fab);
     }
 
     private void initializeView() {
@@ -149,6 +156,13 @@ public class DashBoardActivity extends AppCompatActivity {
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.addDrawerListener(toggle);
         toggle.syncState();
+
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(getApplicationContext(),"dsfdsfdsf",Toast.LENGTH_LONG).show();
+            }
+        });
 
         setHeaderDetails();
         addDrawerItems();
@@ -309,8 +323,14 @@ public class DashBoardActivity extends AppCompatActivity {
         } else if (id == R.id.action_about) {
             setFragment(new AboutFragment(), true);
         } else if (id == R.id.action_logout) {
+
+
+            Intent intent = new Intent(android.provider.Settings.ACTION_SETTINGS);
+            DeviceInfo di = new DeviceInfo();
+            String OutMessage = di.getDeviceinfo(DashBoardActivity.this, intent, "Logout");
+
             session.logoutUser();
-            manager.cancel(pendingIntent);
+
             startActivity(new Intent(getApplicationContext(), LoginActivity.class));
             finish();
         }
@@ -394,43 +414,44 @@ public class DashBoardActivity extends AppCompatActivity {
         switch (selectedItem) {
             case Constant.directSchedule:
                 fragment = DirctScheduleFragment.newInstance("Today Schedule", "");
-
+                fab.hide();
                 break;
             case Constant.daySchedule:
-                fragment = DayScheduleFragment.newInstance("Add Schedule", "");
-
+                fragment = DayScheduleFragment.newInstance(Constant.title_day_schedule, "");
+                fab.hide();
                 break;
             case Constant.employeeTracking:
-                fragment = EmployeeTrackingFragment.newInstance("Add Schedule", "");
-
+                fragment = EmployeeTrackingFragment.newInstance(Constant.title_employee_tracking, "");
+                fab.hide();
                 break;
             case Constant.addSchedule:
-                fragment = AddScheduleFragment.newInstance("Add Schedule", "");
-
+                fragment = AddScheduleFragment.newInstance(Constant.title_add_schedule, "");
+                fab.hide();
                 break;
             case Constant.addLeads:
-                fragment = ProspectFragment.newInstance("Add Schedule", "");
-
+                fragment = ProspectFragment.newInstance(Constant.title_day_schedule, "");
+                fab.hide();
                 break;
             case Constant.routeSummary:
-                fragment = RouteSummaryFragment.newInstance("Add Schedule", "");
-
+                fragment = RouteSummaryFragment.newInstance(Constant.title_route_summary, "");
+                fab.hide();
                 break;
             case Constant.serviceSummary:
-                fragment = ServiceSummaryFragment.newInstance("Add Schedule", "");
-
+                fragment = ServiceSummaryFragment.newInstance(Constant.title_route_summary, "");
+                fab.show();
                 break;
             case Constant.fetreview:
-                fragment = StatusReviewFragment.newInstance("Add Schedule", "");
-
+                fragment = StatusReviewFragment.newInstance(Constant.title_fet_review, "");
+                fab.hide();
                 break;
             case Constant.approve:
-                fragment = Approval_Fragment.newInstance("Add Schedule", "");
-
+                fragment = Approval_Fragment.newInstance(Constant.title_Approve, "");
+                fab.hide();
                 break;
             default:
-                fragment = StatusReviewFragment.newInstance("Customers", "");
-
+               // fragment = DayScheduleFragment.newInstance(Constant.title_home, "");
+                fragment=new SalesPlanning();
+                fab.hide();
                 break;
         }
         return fragment;

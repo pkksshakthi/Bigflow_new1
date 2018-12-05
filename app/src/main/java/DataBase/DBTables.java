@@ -17,6 +17,7 @@ public class DBTables {
             "  latlong_gid INTEGER PRIMARY KEY AUTOINCREMENT, " +
             "  latlong_lat double NOT NULL, " +
             "  latlong_long double NOT NULL, " +
+            "  latlong_locationname varchar(128), " +
             "  latlong_emp_gid INT NOT NULL, " +
             "  latlong_date DATETIME NOT NULL, " +
             "  latlong_issync varchar(1) NOT NULL DEFAULT 'N', " +
@@ -32,6 +33,7 @@ public class DBTables {
             Constant.AScustomer_name + " varchar(128)," +
             Constant.ASlocation_name + " varchar(128)," +
             Constant.ASdisplay_name + " varchar(128)," +
+            Constant.AStype_name + " varchar(64)," +
             Constant.ASismanagement + " integer," +
             Constant.ASstatus + " varchar(64)," +
             Constant.ASiseditable + " varchar(10)" +
@@ -40,9 +42,15 @@ public class DBTables {
             Constant.employee_gid + " integer, " +
             Constant.employee_name + " varchar(64)" +
             ")";
+    public static final String CREATE_TABLE_DeviceInfo = "CREATE TABLE IF NOT EXISTS gal_trn_tdeviceinfo  ( " +
+            "  deviceinfo_gid INTEGER PRIMARY KEY AUTOINCREMENT, " +
+            "  deviceinfo_data varchar(2000) NOT NULL, " +
+            "  deviceinfo_date DATETIME NOT NULL, " +
+            "  deviceinfo_issync varchar(1) NOT NULL DEFAULT 'N' " +
+            ") ";
 
     public static final String TEMPTABLE = "create table " + Constant.temptable_name + " ( " +
-            Constant.temptable_gid + " integer, " +
+            Constant.temptable_gid + " integer PRIMARY KEY AUTOINCREMENT, " +
             Constant.temptable_table_name + " varchar(64)," +
             Constant.temptable_table_gid + " integer," +
             Constant.temptable_table_value + " varchar(64)" +
@@ -70,6 +78,16 @@ public class DBTables {
             " product_displayname varchar(64), " +
             " uom_name varchar(16) " +
             ") ";
+    //    ALETR TABLES
+    public static final String ALTER_TABLE_LatLong = "ALTER TABLE fet_trn_tlatlong " +
+            "ADD COLUMN latlong_locationname varchar(128) ";
 
+    public static final String TEMPTABLE_UPDATE = "DROP TABLE IF EXISTS " + Constant.temptable_name + " ;create table  " + Constant.temptable_name + " ( " +
+            Constant.temptable_gid + " integer PRIMARY KEY AUTOINCREMENT, " +
+            Constant.temptable_table_name + " varchar(64)," +
+            Constant.temptable_table_gid + " integer," +
+            Constant.temptable_table_value + " varchar(64)" +
+            ")";
+    public static final String CUSTOMER_ADDSCHEDULE_UPDATE = "ALTER TABLE " + Constant.AStable_name + " ADD COLUMN " + Constant.AStype_name + " varchar(64);";
 
 }

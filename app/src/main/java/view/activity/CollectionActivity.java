@@ -1,6 +1,7 @@
 package view.activity;
 
 import android.os.Handler;
+import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -16,6 +17,10 @@ import com.vsolv.bigflow.R;
 import java.util.ArrayList;
 import java.util.List;
 
+import constant.Constant;
+import models.ViewPagerAdapter;
+import view.fragment.Collection;
+import view.fragment.OtherFragment;
 import view.fragment.Promise_tobuy;
 import view.fragment.Promise_topay;
 import view.fragment.Sales_order;
@@ -26,59 +31,58 @@ public class CollectionActivity extends AppCompatActivity {
     private TabLayout tabLayout;
     private ViewPager viewPager;
     private Bundle customer_details;
-    private int schedule_type_gid,customer_gid;
+    private int schedule_type_gid, customer_gid;
+    public FloatingActionButton fab;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_collection);
-        collectionToolbar = (Toolbar) findViewById(R.id.collectionToolbar);
-        collectionToolbar.setTitle("");
+        collectionToolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(collectionToolbar);
-        collectionToolbar.setTitle("Collection");
+        getSupportActionBar().setTitle(Constant.title_collection);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        loadView();
+        initializeView();
+        loadData();
+    }
+
+    private void loadView() {
         viewPager = (ViewPager) findViewById(R.id.viewpager);
-        setupViewPager(viewPager);
         tabLayout = (TabLayout) findViewById(R.id.tabs);
+        fab = (FloatingActionButton) findViewById(R.id.fabCollection);
+    }
+
+    private void initializeView() {
+        setupViewPager(viewPager);
         tabLayout.setupWithViewPager(viewPager);
+        tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+            @Override
+            public void onTabSelected(TabLayout.Tab tab) {
+
+            }
+
+            @Override
+            public void onTabUnselected(TabLayout.Tab tab) {
+
+            }
+
+            @Override
+            public void onTabReselected(TabLayout.Tab tab) {
+
+            }
+        });
+    }
+
+    private void loadData() {
 
     }
 
     private void setupViewPager(ViewPager viewPager) {
         ViewPagerAdapter adapter = new ViewPagerAdapter(getSupportFragmentManager());
-        adapter.addFragment(new Promise_topay(), "Collection");
+        adapter.addFragment(new Collection(), "Collection");
         adapter.addFragment(new Promise_topay(), "P2P");
-
-
         viewPager.setAdapter(adapter);
-    }
-
-    class ViewPagerAdapter extends FragmentPagerAdapter {
-        private final List<Fragment> mFragmentList = new ArrayList<>();
-        private final List<String> mFragmentTitleList = new ArrayList<>();
-
-        public ViewPagerAdapter(FragmentManager manager) {
-            super(manager);
-        }
-
-        @Override
-        public Fragment getItem(int position) {
-            return mFragmentList.get(position);
-        }
-
-        @Override
-        public int getCount() {
-            return mFragmentList.size();
-        }
-
-        public void addFragment(Fragment fragment, String title) {
-            mFragmentList.add(fragment);
-            mFragmentTitleList.add(title);
-        }
-
-        @Override
-        public CharSequence getPageTitle(int position) {
-            return mFragmentTitleList.get(position);
-        }
     }
 
     @Override
@@ -96,7 +100,7 @@ public class CollectionActivity extends AppCompatActivity {
 
             @Override
             public void run() {
-                doubleBackToExitPressedOnce=false;
+                doubleBackToExitPressedOnce = false;
             }
         }, 2000);
     }

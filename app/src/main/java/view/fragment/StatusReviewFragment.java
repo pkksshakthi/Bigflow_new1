@@ -5,7 +5,6 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.res.Resources;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
@@ -17,14 +16,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.SearchView;
-import android.widget.Spinner;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
@@ -43,7 +40,7 @@ import org.json.JSONObject;
 
 
 import java.util.ArrayList;
-import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 import DataBase.GetData;
@@ -56,7 +53,6 @@ import models.Variables;
 import network.CallbackHandler;
 import presenter.NetworkResult;
 import presenter.VolleyCallback;
-import view.activity.FilterAddScheduleActivity;
 import view.activity.FilterStatusReview;
 
 import static android.app.Activity.RESULT_CANCELED;
@@ -77,7 +73,7 @@ public class StatusReviewFragment extends Fragment implements View.OnClickListen
     private RadioGroup radioGroup;
     private ProgressDialog progressDialog;
     private int filterCode = 101;
-    private List<Variables.StatusReview> statusReview_lists;
+    private List<Variables.StatusReview> statusReview_lists, tempstatusReview;
     private EditText alert_remark;
     private SearchView customerSearch;
     private GetData getdata;
@@ -119,7 +115,7 @@ public class StatusReviewFragment extends Fragment implements View.OnClickListen
         fragmentView = view;
         loadView(view);
         initializeView();
-        loadData(UserDetails.getUser_id());
+        loadData();
 
         return view;
     }
@@ -139,10 +135,14 @@ public class StatusReviewFragment extends Fragment implements View.OnClickListen
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(this.getActivity()));
         statusReview_lists = new ArrayList<>();
+        tempstatusReview = new ArrayList<>();
         reload.setOnClickListener(this);
         txtEmployee.setOnClickListener(this);
         txtFilter.setOnClickListener(this);
         bundle = new Bundle();
+        String current_date = Common.convertDateString(new Date(), Constant.date_display_format);
+        bundle.putString(Constant.key_fdate, current_date);
+        bundle.putString(Constant.key_tdate, current_date);
         getdata = new GetData(getActivity());
         progressDialog = new ProgressDialog(getContext());
         progressDialog.setTitle(getResources().getString(R.string.loading));
@@ -165,7 +165,7 @@ public class StatusReviewFragment extends Fragment implements View.OnClickListen
 
     }
 
-    private void loadData(int employee_gid) {
+    private void loadData() {
         if (!Common.isOnline(getContext())) {
             Snackbar.with(getActivity(), null)
                     .type(Type.WARNING)
@@ -177,25 +177,17 @@ public class StatusReviewFragment extends Fragment implements View.OnClickListen
             setVisibility(View.GONE, View.GONE, View.VISIBLE);
             return;
         }
-        progressDialog.show();
-        statusReview_lists = getdata.getStatusReview(employee_gid, 0, 0, 0, 0, new NetworkResult() {
-            @Override
-            public void handlerResult(String result) {
-                setAdapter();
-            }
-
-            @Override
-            public void handlerError(String result) {
-
-            }
-        });
-getLoadData();
+        getLoadData(getFilteredList());
         employeeList = getdata.EmployeeList(UserDetails.getUser_id(), new NetworkResult() {
             @Override
             public void handlerResult(String result) {
                 employeeDetailList = new ArrayList<>();
+                Variables.Details details = new Variables.Details();
+                details.data = getResources().getString(R.string.choose);
+                details.gid = 0;
+                employeeDetailList.add(details);
                 for (int i = 0; employeeList.size() > i; i++) {
-                    Variables.Details details = new Variables.Details();
+                    details = new Variables.Details();
                     details.data = employeeList.get(i).employee_name;
                     details.gid = employeeList.get(i).employee_gid;
                     employeeDetailList.add(details);
@@ -210,118 +202,59 @@ getLoadData();
 
     }
 
-    private void getLoadData() {
-        /*progressDialog.show();
-        statusReview_lists = getdata.getStatusReview(employee_gid, 0, 0, 0, 0, new NetworkResult() {
+    private Variables.paramsStatusReview getFilteredList() {
+        Variables.paramsStatusReview params = new Variables.paramsStatusReview();
+        String current_date = Common.convertDateString(new Date(), Constant.date_display_format);
+        params.employee_gid = bundle.getInt(Constant.key_employee_gid, 0);
+        params.customer_gid = bundle.getInt(Constant.key_customer_gid, 0);
+        params.scheduletype_gid = bundle.getInt(Constant.key_sch_type_gid, 0);
+        params.custgroup_gid = bundle.getInt(Constant.key_cust_group_gid, 0);
+        params.location_gid = bundle.getInt(Constant.key_loaction_gid, 0);
+        params.sch_review_status = bundle.getString(Constant.key_sch_review_status, Constant.status_review_pending);
+        params.from_date = bundle.getString(Constant.key_fdate, current_date);
+        params.todate = bundle.getString(Constant.key_tdate, current_date);
+        return params;
+    }
+
+    private void getLoadData(final Variables.paramsStatusReview params) {
+        progressDialog.show();
+        statusReview_lists = getdata.getStatusReview(params, new NetworkResult() {
             @Override
             public void handlerResult(String result) {
+                tempstatusReview = new ArrayList<>();
+                for (int i = 0; i < statusReview_lists.size(); i++) {
+                    if (statusReview_lists.get(i).review_status.equals(params.sch_review_status)) {
+                        tempstatusReview.add(statusReview_lists.get(i));
+                    }
+                }
                 setAdapter();
+                progressDialog.cancel();
             }
 
             @Override
             public void handlerError(String result) {
-
+                progressDialog.cancel();
             }
-        });*/
+        });
     }
 
     public void setAdapter() {
 
-        adapter = new StatusReviewAdapter(getActivity(), statusReview_lists);
+        adapter = new StatusReviewAdapter(getActivity(), tempstatusReview);
         recyclerView.setAdapter(adapter);
 
         progressDialog.dismiss();
         adapter.setOnclickListener(new StatusReviewAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(final Variables.StatusReview item, int position) {
-                AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-
-                LayoutInflater inflater = getLayoutInflater();
-                final View dialogView = inflater.inflate(R.layout.alert_fetapprove, null);
-                status_remark = (EditText) dialogView.findViewById(R.id.status_remark);
-                radioGroup = (RadioGroup) dialogView.findViewById(R.id.approve_group);
-                builder.setTitle("Approve");
-                builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        int selectedId = radioGroup.getCheckedRadioButtonId();
-                        radioButton = (RadioButton) dialogView.findViewById(selectedId);
-                        final JSONArray Schedulearry = new JSONArray();
-                        JSONObject schedulereviewobj = new JSONObject();
-                        JSONObject paramJson = new JSONObject();
-                        JSONObject detailJson = new JSONObject();
-                        if (item.schedulereview_gid != 0) {
-                            try {
-                                schedulereviewobj.put("schedulereview_gid", item.schedulereview_gid);
-                                schedulereviewobj.put("status", radioButton.getText());
-                                schedulereviewobj.put("remarks", status_remark.getText().toString());
-                                detailJson.put("action", "Update");
-                            } catch (Exception e) {
-
-                            }
-                        } else {
-                            try {
-                                schedulereviewobj.put("schedule_gid", item.schedule_gid);
-                                schedulereviewobj.put("status", radioButton.getText());
-                                schedulereviewobj.put("remarks", status_remark.getText().toString());
-                                detailJson.put("action", "Insert");
-                            } catch (Exception e) {
-
-                            }
-                        }
-                        try {
-                            Schedulearry.put(schedulereviewobj);
-
-                            detailJson.put("data", new JSONObject().put("schedulereview", Schedulearry));
-                            paramJson.put("parms", detailJson);
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-
-                        }
-                        String URL = Constant.URL + "FET_ReviewApprove_set?Emp_Gid=" + UserDetails.getUser_id();
-                        CallbackHandler.sendReqest(getActivity(), Request.Method.POST, paramJson.toString(), URL, new VolleyCallback() {
-                            @Override
-                            public void onSuccess(String result) {
-
-                                try {
-                                    JSONObject jsonObject = new JSONObject(result);
-                                    String message = jsonObject.getString("MESSAGE");
-
-                                    if (message.equals("SUCCESS")) {
-                                        statusReview_lists.clear();
-                                        loadData(bundle.getInt("employee_gid", UserDetails.getUser_id()));
-                                        //setAdapter();
-                                        Toast.makeText(getContext(), "Message Saved Successfully.!", Toast.LENGTH_LONG).show();
-
-                                    } else {
-                                        Toast.makeText(getContext(), "Failed.!", Toast.LENGTH_LONG).show();
-
-                                    }
-
-                                } catch (JSONException e) {
-                                    e.printStackTrace();
-                                }
-                            }
-
-                            @Override
-                            public void onFailure(String result) {
-                                Log.e("APPR_FAIL", result);
-                            }
-
-                        });
+                if (item.isAdmin) {
+                    if (item.employee_gid != UserDetails.getUser_id()) {
+                        createApproveDialog(item);
+                    } else {
+                        Toast.makeText(getContext(), "Can't approve your's details", Toast.LENGTH_LONG).show();
                     }
-                });
+                }
 
-                builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        dialogInterface.dismiss();
-                    }
-                });
-                builder.setView(dialogView);
-                final Dialog dialog = builder.create();
-                dialog.show();
             }
 
             @Override
@@ -360,6 +293,107 @@ getLoadData();
         }
     }
 
+    private void createApproveDialog(final Variables.StatusReview item) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+        LayoutInflater inflater = getLayoutInflater();
+        final View dialogView = inflater.inflate(R.layout.alert_fetapprove, null);
+        status_remark = (EditText) dialogView.findViewById(R.id.status_remark);
+        radioGroup = (RadioGroup) dialogView.findViewById(R.id.approve_group);
+        builder.setTitle("Approve");
+        if (item.schedulereview_gid != 0) {
+            status_remark.setText(item.review_remarks);
+            status_remark.setSelection(item.review_remarks.length());
+            if (item.review_status.equals("APPROVE")) {
+                radioGroup.check(R.id.radioApprove);
+            } else {
+                radioGroup.check(R.id.radioReject);
+            }
+
+        }
+
+        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                int selectedId = radioGroup.getCheckedRadioButtonId();
+                radioButton = (RadioButton) dialogView.findViewById(selectedId);
+                final JSONArray Schedulearry = new JSONArray();
+                JSONObject schedulereviewobj = new JSONObject();
+                JSONObject paramJson = new JSONObject();
+                JSONObject detailJson = new JSONObject();
+                if (item.schedulereview_gid != 0) {
+                    try {
+                        schedulereviewobj.put("schedulereview_gid", item.schedulereview_gid);
+                        schedulereviewobj.put("status", radioButton.getText());
+                        schedulereviewobj.put("remarks", status_remark.getText().toString());
+                        detailJson.put("action", "Update");
+                    } catch (Exception e) {
+
+                    }
+                } else {
+                    try {
+                        schedulereviewobj.put("schedule_gid", item.schedule_gid);
+                        schedulereviewobj.put("status", radioButton.getText());
+                        schedulereviewobj.put("remarks", status_remark.getText().toString());
+                        detailJson.put("action", "Insert");
+                    } catch (Exception e) {
+
+                    }
+                }
+                try {
+                    Schedulearry.put(schedulereviewobj);
+
+                    detailJson.put("data", new JSONObject().put("schedulereview", Schedulearry));
+                    paramJson.put("parms", detailJson);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+
+                }
+                String URL = Constant.URL + "FET_ReviewApprove_set?Emp_Gid=" + UserDetails.getUser_id();
+                CallbackHandler.sendReqest(getActivity(), Request.Method.POST, paramJson.toString(), URL, new VolleyCallback() {
+                    @Override
+                    public void onSuccess(String result) {
+
+                        try {
+                            JSONObject jsonObject = new JSONObject(result);
+                            String message = jsonObject.getString("MESSAGE");
+
+                            if (message.equals("SUCCESS")) {
+                                statusReview_lists.clear();
+                                loadData();
+                                //setAdapter();
+                                Toast.makeText(getContext(), "Message Saved Successfully.!", Toast.LENGTH_LONG).show();
+
+                            } else {
+                                Toast.makeText(getContext(), "Failed.!", Toast.LENGTH_LONG).show();
+
+                            }
+
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(String result) {
+                        Log.e("APPR_FAIL", result);
+                    }
+
+                });
+            }
+        });
+
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                dialogInterface.dismiss();
+            }
+        });
+        builder.setView(dialogView);
+        final Dialog dialog = builder.create();
+        dialog.show();
+    }
+
     private void createSalesDialog() {
         builder = new AlertDialog.Builder(getContext());
         Context dialogContext = builder.getContext();
@@ -371,47 +405,39 @@ getLoadData();
         TextView title = alertView.findViewById(R.id.txt_Sales);
         title.setText("Booking");
         TableLayout tableLayout = (TableLayout) alertView.findViewById(R.id.table_layout);
-        String[] header_Booking = {"S.No", "SO No", "Product", "Qty", "Amount", "Total"};
         tableLayout.setStretchAllColumns(true);
-        tableLayout.setShrinkAllColumns(true);
+        String[] header_Booking = {"S.No", "SO No", "Product", "Quantity", "Amount", "Total"};
+
 
         TableRow tableRow;
         tableRow = new TableRow(getActivity());
         TableRow.LayoutParams lp = new TableRow.LayoutParams(TableRow.LayoutParams.MATCH_PARENT, TableRow.LayoutParams.MATCH_PARENT);//(TableRow.LayoutParams.MATCH_PARENT, TableRow.LayoutParams.MATCH_PARENT);
         tableRow.setLayoutParams(lp);
-        //tableRow.setBackgroundColor(getActivity().getResources().getColor(R.color.colorAccent));
 
         for (int i = 0; i < header_Booking.length; i++) {
-            TextView sNo = new TextView(getActivity());
-            sNo.setText(header_Booking[i]);
-            sNo.setTextColor(0xFFFFFFFF);
-            sNo.setTextSize(15);
-            sNo.setGravity(Gravity.CENTER);
-            sNo.setLayoutParams(lp);
-            sNo.setBackgroundResource(R.drawable.table_header);
-            tableRow.addView(sNo);
+            TextView textView = new TextView(getActivity());
+            textView.setText(header_Booking[i]);
+            textView.setTextColor(0xFFFFFFFF);
+            textView.setTextSize(15);
+            textView.setGravity(Gravity.CENTER);
+            textView.setLayoutParams(lp);
+            textView.setBackgroundResource(R.drawable.table_header);
+            tableRow.addView(textView);
         }
 
         tableLayout.addView(tableRow, 0);
         for (int i = 0; i < salesDetailList.size(); i++) {
             Variables.SalesDetail salesDetail = salesDetailList.get(i);
-            String detail_value[] = {Integer.toString(i + 1), salesDetail.soheader_gid, salesDetail.product_name
+            String detail_value[] = {Integer.toString(i + 1), salesDetail.soheader_no, salesDetail.product_name
                     , String.valueOf(salesDetail.product_quantity), String.valueOf(salesDetail.product_price), String.valueOf(salesDetail.total_price)};
-            tableLayout.setStretchAllColumns(true);
-            tableLayout.setShrinkAllColumns(true);
 
             tableRow = new TableRow(getActivity());
-            //TableRow.LayoutParams lp = new TableRow.LayoutParams(TableRow.LayoutParams.MATCH_PARENT, TableRow.LayoutParams.MATCH_PARENT);
             tableRow.setLayoutParams(lp);
-            //tableRow.setBackgroundColor(Color.WHITE);
-
 
             for (int j = 0; j < detail_value.length; j++) {
                 TextView dtl = new TextView(getActivity());
                 dtl.setText(detail_value[j]);
-
                 dtl.setGravity(Gravity.CENTER);
-
                 dtl.setBackground(getResources().getDrawable(R.drawable.table_body));
                 dtl.setLayoutParams(lp);
                 tableRow.addView(dtl);
@@ -426,8 +452,8 @@ getLoadData();
 
     public void filter(String text) {
         List<Variables.StatusReview> temp = new ArrayList();
-        if (statusReview_lists.size() > 0) {
-            for (Variables.StatusReview d : statusReview_lists) {
+        if (tempstatusReview.size() > 0) {
+            for (Variables.StatusReview d : tempstatusReview) {
 
                 if (d.customer_name.toLowerCase().replaceAll("\\s+", "").contains(text.toLowerCase().replaceAll("\\s+", ""))) {
                     temp.add(d);
@@ -472,9 +498,9 @@ getLoadData();
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                bundle.putString("employee_name", "");
-                bundle.putInt("employee_gid", position);
-                loadData(listAdapter.getItem(position).gid);
+                txtEmployee.setText(listAdapter.getItem(position).data);
+                bundle.putInt(Constant.key_employee_gid, listAdapter.getItem(position).gid);
+                getLoadData(getFilteredList());
                 alertDialog.cancel();
             }
         });
@@ -489,13 +515,12 @@ getLoadData();
         if (requestCode == filterCode) {
 
             if (resultCode == RESULT_OK) {
-                String temp;
+                int temp;
+                bundle = new Bundle();
                 bundle = data.getExtras();
-                temp = bundle.getString("fDate");
-                String fdate;
-                if (temp != null && !temp.equals(getResources().getString(R.string.from_date)))
-                    fdate = temp ;
-                // tvResultCode.setText("RESULT_OK");
+                temp = bundle.getInt(Constant.key_employee_gid);
+                txtEmployee.setText(bundle.getString(Constant.key_employee_name));
+                getLoadData(getFilteredList());
 
             } else if (resultCode == RESULT_CANCELED) {
 

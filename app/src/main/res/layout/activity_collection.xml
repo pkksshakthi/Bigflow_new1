@@ -1,5 +1,4 @@
-<android.support.design.widget.CoordinatorLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
@@ -9,24 +8,17 @@
         android:layout_height="wrap_content"
         android:theme="@style/AppTheme">
 
-        <android.support.v7.widget.Toolbar
-            android:id="@+id/collectionToolbar"
-            android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:background="?attr/colorPrimary"
-            app:titleTextColor="@color/colorWhite"
-            app:layout_scrollFlags="scroll|snap"
-            />
+        <include layout="@layout/toolbar_layout"></include>
 
         <android.support.design.widget.TabLayout
             android:id="@+id/tabs"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:tabGravity="fill"
-            app:tabTextColor="@color/shadow_color"
             app:tabIndicatorColor="@android:color/white"
+            app:tabMode="fixed"
             app:tabSelectedTextColor="@android:color/white"
-            app:tabMode="fixed" />
+            app:tabTextColor="@color/shadow_color" />
     </android.support.design.widget.AppBarLayout>
 
     <android.support.v4.view.ViewPager
@@ -34,4 +26,16 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/fabCollection"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="@dimen/fab_margin"
+        android:src="@drawable/ic_action_courier"
+        app:borderWidth="0dp"
+        app:elevation="6dp"
+        app:fabSize="normal"/>
+
 </android.support.design.widget.CoordinatorLayout>

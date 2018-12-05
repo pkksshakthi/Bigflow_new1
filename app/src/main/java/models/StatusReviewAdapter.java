@@ -16,6 +16,8 @@ import com.vsolv.bigflow.R;
 
 import java.util.List;
 
+import constant.Constant;
+
 public class StatusReviewAdapter extends RecyclerView.Adapter<StatusReviewAdapter.CustomerViewHolder> {
     private Context mCtx;
     private List<Variables.StatusReview> StausList;
@@ -46,14 +48,24 @@ public class StatusReviewAdapter extends RecyclerView.Adapter<StatusReviewAdapte
         holder.customerName.setText(statusReview.customer_name);
         holder.EmployeeName.setText(statusReview.employee_name);
         holder.sch_type.setText(statusReview.schedule_type);
-        holder.sch_date.setText(statusReview.schedule_date);
-        holder.sch_status.setText(statusReview.schedule_status + "-" + statusReview.followup_reason);
-        holder.followup_date.setText(statusReview.followup_date);
+        holder.sch_date.setText(Common.convertDateString(statusReview.schedule_date, "yyyy-MM-dd", Constant.date_display_format));
+        String followup = statusReview.followup_reason.equals("null") ? "" : " - " + statusReview.followup_reason;
+        holder.sch_status.setText(statusReview.schedule_status + followup);
+        if (!statusReview.followup_date.equals("null")) {
+            holder.followup_date.setText(statusReview.followup_date);
+        } else {
+            holder.followup_date.setText("");
+        }
 
         if (statusReview.schedule_status.equals("CLOSED") && statusReview.followup_reason.equals("Sales")) {
             holder.sch_type.setTextColor(mCtx.getResources().getColor(R.color.colorAccent));
         } else {
             holder.sch_type.setTextColor(mCtx.getResources().getColor(R.color.TextSecondary));
+        }
+        if (!statusReview.review_remarks.equals("null")) {
+            holder.remark.setText("* " + statusReview.review_remarks);
+        } else {
+            holder.remark.setText("");
         }
 
     }
@@ -81,7 +93,7 @@ public class StatusReviewAdapter extends RecyclerView.Adapter<StatusReviewAdapte
     }
 
     public class CustomerViewHolder extends RecyclerView.ViewHolder {
-        TextView customerName, EmployeeName, sch_type, sch_date, sch_status, followup_date;
+        TextView customerName, EmployeeName, sch_type, sch_date, sch_status, followup_date, remark;
 
         public CustomerViewHolder(View itemView, final OnItemClickListener listener) {
             super(itemView);
@@ -92,6 +104,7 @@ public class StatusReviewAdapter extends RecyclerView.Adapter<StatusReviewAdapte
             sch_date = itemView.findViewById(R.id.txtsch_date);
             sch_status = itemView.findViewById(R.id.txtStatus);
             followup_date = itemView.findViewById(R.id.txtFollowupDate);
+            remark = itemView.findViewById(R.id.txtRemark);
 
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override

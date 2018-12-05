@@ -222,7 +222,7 @@ public class LocationService extends Service implements LocationListener {
                     session = new UserSessionManager(getApplicationContext());
 
                     if (session.isUserLoggedIn()) {
-                        fn_getlocation();
+                        //fn_getlocation();
 
 
                     }

@@ -87,8 +87,8 @@ public class StockActivity extends AppCompatActivity implements View.OnClickList
         getSupportActionBar().setDisplayShowHomeEnabled(true);
         if (getIntent() != null) {
             customer_details = getIntent().getExtras();
-            customer_gid = customer_details.getInt("customer_id");
-            schedule_type_gid = customer_details.getInt("scheduletype_id");
+            customer_gid = customer_details.getInt(Constant.key_customer_gid, 0);
+            schedule_type_gid = customer_details.getInt(Constant.key_sch_type_gid, 0);
         }
 
 //

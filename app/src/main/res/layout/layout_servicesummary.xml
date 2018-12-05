@@ -25,6 +25,7 @@
                 android:layout_height="wrap_content"
                 android:paddingTop="3dp"
                 android:paddingBottom="3dp"
+                android:gravity="center|left"
                 android:text="Customer Name" />
 
             <TextView

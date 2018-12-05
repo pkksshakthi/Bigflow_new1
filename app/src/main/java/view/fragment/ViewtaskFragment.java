@@ -215,11 +215,11 @@ public class ViewtaskFragment extends Fragment {
         adapter.setOnclickListener(new ViewtaskAdapater.OnItemClickListener() {
             @Override
             public void onItemClick(Variables.Viewtask_customer item, int position) {
-                if (item.getSchedule_ref_gid() != 0) {
-                    sessiondata.putInt("soheader_no", item.getSchedule_ref_gid());
-                    sessiondata.putInt("customer_id", item.getCustomer_gid());
-                    sessiondata.putString("Status", item.getStatus());
-                    sessiondata.putInt("Sale_Schedule_gid", item.getSchedule_gid());
+                if (item.getSchedule_ref_gid() != 0 && !item.getStatus().equals("APPROVED") && !item.getStatus().equals("CANCELLED")) {
+                    sessiondata.putInt(Constant.key_soheader_gid, item.getSchedule_ref_gid());
+                    sessiondata.putInt(Constant.key_customer_gid, item.getCustomer_gid());
+                    //sessiondata.putString("Status", item.getStatus());
+                    sessiondata.putInt(Constant.key_schedule_gid, item.getSchedule_gid());
                     sessiondata.putString("Edit_flg", "Y");
 
                     Class aClass = SalesActivity.class;

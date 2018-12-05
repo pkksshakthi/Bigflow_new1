@@ -3,6 +3,12 @@ package models;
 
 import android.widget.EditText;
 
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+
+import constant.Constant;
+
 public class Variables {
     public static class Menulist {
         public int Menu_gid;
@@ -63,6 +69,7 @@ public class Variables {
     public static class Location {
         public double latlong_lat;
         public double latlong_long;
+        public String latlong_locationname;
         public int emp_gid;
         public String latlong_date;
         public int latlong_gid;
@@ -81,21 +88,10 @@ public class Variables {
         public String product_code;
     }
 
-    public static class Sales {
-        public int sodetails_product_gid;
-        public double quantity;
-
-    }
 
     public static class Service {
-        public int product_id;
-        public String product_name;
-
-        public Service(int product_id, String product_name) {
-            this.product_id = product_id;
-            this.product_name = product_name;
-
-        }
+        public int product_gid;
+        public String product_name, product_serial_no, product_remark;
     }
 
     public static class Timeline {
@@ -110,12 +106,6 @@ public class Variables {
         public Status status;
     }
 
-    // Stock Autocomplete
-    public static class stockProduct {
-        public String product_id;
-        public String product_name;
-    }
-
     //Stock set
     public static class Stock {
         public int prduct_id;
@@ -124,188 +114,29 @@ public class Variables {
 
     }
 
-    public static class ServiceSummary_List {
-        private String Customername;
-        private String Productname;
-        private int Productgid, servicegid;
-        private String ProductSlno, Service_courierexp;
-        private String Remark;
-        private String Date;
-        private boolean isSelected = false;
+    public static class ServiceSummary {
+        public String customer_name;
+        public String product_name;
+        public int product_gid, service_gid;
+        public String product_Slno, service_courierexp;
+        public String service_remark;
+        public String service_date;
+        public boolean is_selected;
 
-        public ServiceSummary_List(String Customername, String Productname,
-                                   String Date, int servicegid, int Productgid,
-                                   String ProductSlno, String Remark, String Service_courierexp) {
-            this.Customername = Customername;
-            this.Productname = Productname;
-            this.Date = Date;
-            this.servicegid = servicegid;
-            this.Productgid = Productgid;
-            this.ProductSlno = ProductSlno;
-            this.Remark = Remark;
-            this.Service_courierexp = Service_courierexp;
-        }
-
-        public String getCustomername() {
-            return Customername;
-        }
-
-        public String getProductname() {
-            return Productname;
-        }
-
-        public String getDate() {
-            return Date;
-        }
-
-        public int getservicegid() {
-            return servicegid;
-        }
-
-        public int getProductgid() {
-            return Productgid;
-        }
-
-        public String getRemark() {
-            return Remark;
-        }
-
-        public String getProductSlno() {
-            return ProductSlno;
-        }
-
-        public String getService_courierexp() {
-            return Service_courierexp;
-        }
-
-        public boolean isSelected() {
-            return isSelected;
-        }
-
-        public void setSelected(boolean selected) {
-            isSelected = selected;
-        }
-
-
-    }
-
-    public static class Courier {
-
-        private int id;
-        private String couriername;
-
-        public Courier(int id, String couriername) {
-            this.id = id;
-            this.couriername = couriername;
-        }
-
-        public int getId() {
-            return id;
-        }
-
-        public void setId(int id) {
-            this.id = id;
-        }
-
-        public String getCouriernameName() {
-            return couriername;
-        }
-
-        public void setName(String couriername) {
-            this.couriername = couriername;
-        }
-
-
-        //to display object as a string in spinner
-        @Override
-        public String toString() {
-            return couriername;
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (obj instanceof Courier) {
-                Courier c = (Courier) obj;
-                if (c.getCouriernameName().equals(couriername) && c.getId() == id) return true;
-            }
-
-            return false;
-        }
-
-    }
-
-    public static class courierset {
-        public static int courier_id;
-        public static String AWB_no;
-        public static String Mode;
-        public static String Packet;
-        public static String Weight;
-        public static String Date;
-        public static String Send_to;
-
-        public int getCourierid() {
-            return courier_id;
-        }
-
-        public String getDate() {
-            return Date;
-        }
-
-        public String getAWB_no() {
-            return AWB_no;
-        }
-
-        public String getMode() {
-            return Mode;
-        }
-
-        public String getPacket() {
-            return Packet;
-        }
-
-        public String getWeight() {
-            return Weight;
-        }
-
-        public String getSend_to() {
-            return Send_to;
-        }
-
-        public String getinout_flag() {
-            if (Send_to.equals("SEND TO CENTRAL OFFICE")) {
-                return "SERVICE_TOCENTRAL";
-            } else {
-                return "SERVICE_TOBRANCH";
-            }
-
-        }
-
-        public Boolean anyUnset() {
-//            if (courier_id == null) return true;
-            if (AWB_no.length() == 0) return true;
-            if (Mode == null) return true;
-            if (Packet.length() == 0) return true;
-            if (Weight.length() == 0) return true;
-            if (Send_to == null) return true;
-            if (Date == null) return true;
-
-            return false;
-        }
     }
 
     public static class Details {
         public int gid;
         public String data;
         public int dataColor;
-        public int Schedule_gid;
-        public String Salestatus;
+        public String status;
     }
 
     public static class History {
         public String employee_name;
         public String schedule_date;
-        public String schedule_type;
-        public String followup;
+        public String schedule_type, schedule_status;
+        public String followup, reschedule_date, followup_date;
     }
 
     public static class StatusReview {
@@ -314,9 +145,9 @@ public class Variables {
         public String schedule_type, schedule_date, followup_date, followup_reason;
         public String schedule_status;
         public String remark;
-        public int schedule_gid, soheader_gid, schedulereview_gid;
+        public int schedule_gid, soheader_gid, schedulereview_gid, employee_gid;
         public String review_remarks, review_status;
-        private boolean isSelected;
+        public boolean isSelected, isAdmin;
 
     }
 
@@ -423,18 +254,6 @@ public class Variables {
         public String title;
     }
 
-    public static class Update_sales {
-        public int product_id;
-        public int sodetails_gid;
-        public int qty;
-
-
-        public Update_sales(int product_id, int sodetails_gid, int qty) {
-            this.product_id = product_id;
-            this.sodetails_gid = sodetails_gid;
-            this.qty = qty;
-        }
-    }
 
     public static class Comment {
         public String comment_message, comment_date, employee_name;
@@ -443,9 +262,54 @@ public class Variables {
     }
 
     public static class SalesDetail {
-        public String soheader_gid, sodetail_gid, product_name;
-        public int product_quantity;
+        public String  product_name,sales_date,soheader_no;
+        public int product_quantity,order_quantity,product_gid,sodetail_gid,soheader_gid;
         public double product_price, total_price;
     }
+
+    public static class paramsStatusReview {
+        public int employee_gid, customer_gid, scheduletype_gid, custgroup_gid, location_gid;
+        public String employee_name, from_date, todate, sch_from_data, sch_to_date, resch_from_date, resch_to_date, sch_review_status;
+    }
+
+    public static class calendarDate {
+        private final Date date1;
+        private int year, dayofmonth, month;
+
+        public calendarDate(String date) {
+
+            if (date == null || date.equals("")) {
+                date1 = new Date();
+            } else {
+                date1 = Common.convertDate(date, Constant.date_display_format);
+            }
+
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(date1);
+            year = calendar.get(Calendar.YEAR);
+            month = calendar.get(Calendar.MONTH);
+            dayofmonth = calendar.get(Calendar.DAY_OF_MONTH);
+
+        }
+
+        public int getDayofmonth() {
+            return dayofmonth;
+        }
+
+        public int getMonth() {
+            return month;
+        }
+
+        public int getYear() {
+            return year;
+        }
+    }
+
+    public static class paramsAddSchedule {
+        public int cust_mode_gid, cust_size_gid, cust_category_gid, cust_constitution_gid;
+        public String cust_type;
+        public List<Integer> employee_gid, cluster_gid, route_gid;
+    }
+
 
 }

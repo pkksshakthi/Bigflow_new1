@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context="view.activity.SalesPlanActivity">
+
+    <TextView
+        android:id="@+id/SPCustName"
+        style="@style/PrimaryTextHilight"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Customer Name" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:layout_margin="@dimen/brv_margin"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/SPProductName"
+            style="@style/SecondaryText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Product Name" />
+
+        <HorizontalScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TableLayout
+                android:id="@+id/SPtable_history"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+
+            </TableLayout>
+        </HorizontalScrollView>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/brv_margin"
+        android:gravity="center"
+        android:orientation="vertical">
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TableLayout
+                android:id="@+id/SPtable_prodcut"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+            </TableLayout>
+        </ScrollView>
+    </LinearLayout>
+</LinearLayout>
